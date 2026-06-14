@@ -1500,6 +1500,9 @@ button, input, select, textarea {
     box-shadow: var(--shadow-lg);
     overflow: hidden;
     animation: modalScaleUp 0.2s ease;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
 }
 .modal-header {
     background-color: var(--primary);
@@ -1523,6 +1526,38 @@ button, input, select, textarea {
 }
 .modal-body {
     padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Dynamic row styles for image fields */
+.image-url-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+.image-url-row input {
+    flex: 1;
+}
+.btn-remove-row {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    width: 38px;
+    height: 38px;
+    border-radius: 4px;
+    font-size: 1.5rem;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+.btn-remove-row:hover {
+    background-color: var(--accent);
+    color: white;
 }
 .modal-footer {
     padding: 15px 20px;
@@ -1754,3 +1789,41 @@ button, input, select, textarea {
         margin-bottom: 20px;
     }
 }
+
+/* Sold Out and Professional E-commerce Utility Styles */
+.pdp-add-btn:disabled, 
+.pdp-buy-btn:disabled,
+.add-to-cart-btn:disabled {
+    background-color: #cbd5e0 !important;
+    color: #718096 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+    pointer-events: none !important;
+}
+
+.pdp-badge-soldout {
+    background-color: #e53e3e;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-left: 8px;
+    text-transform: uppercase;
+}
+
+.card-badge-soldout {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: #e53e3e;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    z-index: 10;
+    text-transform: uppercase;
+}
+

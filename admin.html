@@ -194,6 +194,7 @@
                             <input type="text" id="form-title" required placeholder="e.g. Apple iPad Air 11″ (M2) 256GB">
                         </div>
                     </div>
+                    
                     <div class="form-grid" style="margin-top: 15px;">
                         <div class="form-group">
                             <label for="form-price">Selling Price (Rs.) *</label>
@@ -204,24 +205,55 @@
                             <input type="number" id="form-compare" min="1" placeholder="59900">
                         </div>
                     </div>
-                    <div class="form-grid" style="grid-template-columns: 1.2fr 0.8fr; margin-top: 15px;">
+
+                    <div class="form-grid" style="margin-top: 15px;">
                         <div class="form-group">
-                            <label for="form-img">Main Image URL *</label>
-                            <input type="url" id="form-img" required placeholder="https://cdn.shopify.com/...">
+                            <label for="form-badge">Custom Discount Badge / Label</label>
+                            <input type="text" id="form-badge" placeholder="e.g. Save 98%, Hot Product (Leave blank to auto-calculate)">
                         </div>
+                        <div class="form-group">
+                            <label for="form-stock">Stock Availability *</label>
+                            <select id="form-stock" required>
+                                <option value="in-stock">In Stock</option>
+                                <option value="out-of-stock">Out of Stock</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
                         <div class="form-group">
                             <label for="form-category">Category *</label>
                             <select id="form-category" required>
                                 <option value="tablets">iPads & Tablets</option>
                                 <option value="audio">Audio & Earbuds</option>
+                                <option value="smart-phone">Smart Phones</option>
                                 <option value="gadgets">General Gadgets</option>
                             </select>
                         </div>
                     </div>
+                    
+                    <!-- Dynamic Product Images Section -->
                     <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
                         <div class="form-group">
-                            <label for="form-desc">Brief Description / Specification Bulletpoints</label>
-                            <textarea id="form-desc" rows="3" placeholder="Specifications... (One specification per line)"></textarea>
+                            <label>Product Image URLs *</label>
+                            <div id="image-urls-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="addImageInputRow()" style="margin-top: 8px; width: 100%; border: 1px dashed var(--border-color); background-color: var(--bg-main);">+ Add Another Image URL</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
+                        <div class="form-group">
+                            <label for="form-desc">Product Description *</label>
+                            <textarea id="form-desc" rows="4" required placeholder="Describe the product features, specs overview, warranty..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
+                        <div class="form-group">
+                            <label for="form-specs">Technical Specifications</label>
+                            <textarea id="form-specs" rows="3" placeholder="Enter one specification per line in format Name: Value, e.g.&#10;Processor: Apple M2 Chip&#10;Storage: 256GB ROM"></textarea>
                         </div>
                     </div>
                 </div>
@@ -365,6 +397,46 @@
             }
         }
 
+        // Categorize helper
+        function getProductCategory(product) {
+            if (product.category) return product.category;
+            const title = product.title.toLowerCase();
+            if (title.includes('ipad') || title.includes('tab')) {
+                return 'tablets';
+            }
+            if (title.includes('airdopes') || title.includes('ufo') || title.includes('earbuds') || title.includes('audio') || title.includes('tws')) {
+                return 'audio';
+            }
+            if (title.includes('smartphone') || title.includes('phone') || product.id === '8270415000010') {
+                return 'smart-phone';
+            }
+            return 'gadgets';
+        }
+
+        // Dynamic image input row builder
+        function addImageInputRow(url = '') {
+            const container = document.getElementById('image-urls-container');
+            const row = document.createElement('div');
+            row.className = 'image-url-row';
+            row.innerHTML = `
+                <input type="text" class="image-url-input" required placeholder="https://..." value="${url}">
+                <button type="button" class="btn-remove-row" onclick="removeImageInputRow(this)">&times;</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeImageInputRow(button) {
+            const row = button.closest('.image-url-row');
+            if (row) {
+                row.remove();
+                // Ensure there is at least one image input
+                const container = document.getElementById('image-urls-container');
+                if (container.children.length === 0) {
+                    addImageInputRow('');
+                }
+            }
+        }
+
         // Inventory Tab Renderer
         function renderInventory() {
             const container = document.getElementById('admin-products-list');
@@ -378,7 +450,7 @@
                     <td style="font-weight: 600; max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.title}</td>
                     <td style="color: var(--accent); font-weight: 700;">${p.price}</td>
                     <td style="color: var(--text-muted); text-decoration: line-through;">${p.comparePrice}</td>
-                    <td style="text-transform: capitalize;">${p.category || 'Tablets'}</td>
+                    <td style="text-transform: capitalize;">${getProductCategory(p)}</td>
                     <td>
                         <button class="btn btn-edit" onclick="openEditProductModal('${p.id}')">Edit</button>
                         <button class="btn btn-danger" onclick="handleDeleteProduct('${p.id}')">Delete</button>
@@ -397,8 +469,10 @@
             document.getElementById('product-form').reset();
             document.getElementById('form-product-id').value = '';
             
-            // Random default image url from shopify cdn
-            document.getElementById('form-img').value = 'https://look-10287.myshopify.com/cdn/shop/files/22_87148f00-12f9-4e5e-9951-8717bdcb21de_512x512.jpg?v=1781259482';
+            // Clear image urls container and add a default row
+            const container = document.getElementById('image-urls-container');
+            container.innerHTML = '';
+            addImageInputRow('https://look-10287.myshopify.com/cdn/shop/files/22_87148f00-12f9-4e5e-9951-8717bdcb21de_512x512.jpg?v=1781259482');
 
             document.getElementById('product-modal-element').classList.add('active');
         }
@@ -422,9 +496,28 @@
             
             document.getElementById('form-price').value = priceVal;
             document.getElementById('form-compare').value = compareVal;
-            document.getElementById('form-img').value = product.image;
-            document.getElementById('form-category').value = product.category || 'tablets';
-            document.getElementById('form-desc').value = ''; // specifications
+            document.getElementById('form-badge').value = product.badge || '';
+            document.getElementById('form-stock').value = product.stockStatus || 'in-stock';
+            document.getElementById('form-category').value = product.category || getProductCategory(product);
+            document.getElementById('form-desc').value = product.description || '';
+
+            // Handle specs field
+            if (product.specs && Array.isArray(product.specs)) {
+                document.getElementById('form-specs').value = product.specs.map(s => `${s.name}: ${s.value}`).join('\n');
+            } else {
+                document.getElementById('form-specs').value = '';
+            }
+
+            // Populate images container
+            const container = document.getElementById('image-urls-container');
+            container.innerHTML = '';
+            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                product.images.forEach(img => addImageInputRow(img));
+            } else if (product.image) {
+                addImageInputRow(product.image);
+            } else {
+                addImageInputRow('');
+            }
 
             document.getElementById('product-modal-element').classList.add('active');
         }
@@ -440,21 +533,54 @@
             const title = document.getElementById('form-title').value.trim();
             const priceVal = parseFloat(document.getElementById('form-price').value);
             const compareVal = parseFloat(document.getElementById('form-compare').value);
-            const image = document.getElementById('form-img').value.trim();
             const category = document.getElementById('form-category').value;
+            const badge = document.getElementById('form-badge').value.trim();
+            const stockStatus = document.getElementById('form-stock').value;
             const desc = document.getElementById('form-desc').value.trim();
+
+            // Parse specifications
+            const specsText = document.getElementById('form-specs').value.trim();
+            const specs = [];
+            if (specsText) {
+                const lines = specsText.split('\n');
+                lines.forEach(line => {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex !== -1) {
+                        const name = line.substring(0, colonIndex).trim();
+                        const value = line.substring(colonIndex + 1).trim();
+                        if (name && value) {
+                            specs.push({ name, value });
+                        }
+                    }
+                });
+            }
+
+            // Parse images
+            const imageInputs = document.querySelectorAll('.image-url-input');
+            const images = [];
+            imageInputs.forEach(input => {
+                const val = input.value.trim();
+                if (val) {
+                    images.push(val);
+                }
+            });
+
+            // Fallback image
+            const image = images.length > 0 ? images[0] : 'https://look-10287.myshopify.com/cdn/shop/files/22_87148f00-12f9-4e5e-9951-8717bdcb21de_512x512.jpg?v=1781259482';
+            if (images.length === 0) {
+                images.push(image);
+            }
 
             const products = getProducts();
             
             const price = 'Rs. ' + priceVal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-            const comparePrice = compareVal ? 'Rs. ' + compareVal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : 'Rs. ' + (priceVal * 15).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            const comparePrice = compareVal ? 'Rs. ' + compareVal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : 'Rs. ' + (priceVal * 1.5).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
             const handle = title.toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '');
 
             if (isEditing) {
-                // Find and edit product
                 const idx = products.findIndex(p => p.id === id);
                 if (idx !== -1) {
                     products[idx] = {
@@ -464,12 +590,15 @@
                         price,
                         comparePrice,
                         image,
+                        images,
                         category,
-                        images: [image]
+                        badge,
+                        stockStatus,
+                        description: desc,
+                        specs: specs.length > 0 ? specs : undefined
                     };
                 }
             } else {
-                // Add new product
                 const newId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
                 products.push({
                     id: newId,
@@ -479,8 +608,12 @@
                     price,
                     comparePrice,
                     image,
+                    images,
                     category,
-                    images: [image]
+                    badge,
+                    stockStatus,
+                    description: desc,
+                    specs: specs.length > 0 ? specs : undefined
                 });
             }
 
