@@ -235,11 +235,11 @@
                     <!-- Dynamic Product Images Section -->
                     <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
                         <div class="form-group">
-                            <label>Product Image URLs *</label>
+                            <label>Product Images (Upload) *</label>
                             <div id="image-urls-container">
                                 <!-- Populated dynamically -->
                             </div>
-                            <button type="button" class="btn btn-secondary" onclick="addImageInputRow()" style="margin-top: 8px; width: 100%; border: 1px dashed var(--border-color); background-color: var(--bg-main);">+ Add Another Image URL</button>
+                            <button type="button" class="btn btn-secondary" onclick="addImageInputRow()" style="margin-top: 8px; width: 100%; border: 1px dashed var(--border-color); background-color: var(--bg-main);">+ Add Another Image</button>
                         </div>
                     </div>
                     
@@ -418,11 +418,83 @@
             const container = document.getElementById('image-urls-container');
             const row = document.createElement('div');
             row.className = 'image-url-row';
+            
+            // Check if it's an existing image url (starts with http)
+            const isExisting = url && url.startsWith('http');
+            
             row.innerHTML = `
-                <input type="text" class="image-url-input" required placeholder="https://..." value="${url}">
+                <div class="image-preview-thumbnail" style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--border-color); overflow: hidden; background-color: #f7fafc; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; ${url ? '' : 'display: none;'}">
+                    <span style="font-size: 1.2rem; ${url ? 'display: none;' : ''}">🖼️</span>
+                </div>
+                <input type="hidden" class="image-data-value" value="${url}">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                    ${isExisting ? `
+                        <span class="existing-image-label" style="font-size: 0.8rem; color: var(--text-muted); word-break: break-all; max-height: 36px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Existing Shopify URL</span>
+                    ` : ''}
+                    <input type="file" class="image-file-input" accept="image/*" onchange="handleFileChange(this)" style="font-size: 0.85rem;" ${url ? '' : 'required'}>
+                </div>
                 <button type="button" class="btn-remove-row" onclick="removeImageInputRow(this)">&times;</button>
             `;
             container.appendChild(row);
+        }
+
+        function handleFileChange(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const rawImg = new Image();
+                rawImg.onload = function() {
+                    // Compress using canvas to prevent localStorage limit issues
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 600; // max width/height
+                    let width = rawImg.width;
+                    let height = rawImg.height;
+                    
+                    if (width > height) {
+                        if (width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        }
+                    } else {
+                        if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(rawImg, 0, 0, width, height);
+                    
+                    // Convert to JPEG at 0.7 quality to keep size around 20-30kb
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    const row = input.closest('.image-url-row');
+                    const hiddenInput = row.querySelector('.image-data-value');
+                    hiddenInput.value = compressedDataUrl;
+                    
+                    const imgPreview = row.querySelector('.image-preview-thumbnail img');
+                    const placeholder = row.querySelector('.image-preview-thumbnail span');
+                    
+                    imgPreview.src = compressedDataUrl;
+                    imgPreview.style.display = '';
+                    placeholder.style.display = 'none';
+
+                    const label = row.querySelector('.existing-image-label');
+                    if (label) {
+                        label.innerText = 'Uploaded: ' + file.name;
+                    }
+                    
+                    // Remove required constraint since they have uploaded an image now
+                    input.required = false;
+                };
+                rawImg.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function removeImageInputRow(button) {
@@ -472,7 +544,7 @@
             // Clear image urls container and add a default row
             const container = document.getElementById('image-urls-container');
             container.innerHTML = '';
-            addImageInputRow('https://look-10287.myshopify.com/cdn/shop/files/22_87148f00-12f9-4e5e-9951-8717bdcb21de_512x512.jpg?v=1781259482');
+            addImageInputRow('');
 
             document.getElementById('product-modal-element').classList.add('active');
         }
@@ -556,9 +628,9 @@
             }
 
             // Parse images
-            const imageInputs = document.querySelectorAll('.image-url-input');
+            const imageDataInputs = document.querySelectorAll('.image-data-value');
             const images = [];
-            imageInputs.forEach(input => {
+            imageDataInputs.forEach(input => {
                 const val = input.value.trim();
                 if (val) {
                     images.push(val);
