@@ -615,10 +615,7 @@ function renderFooter() {
                 <div class="footer-col footer-about">
                     <h3>IKKO DIGITAL</h3>
                     <p>We bring you premium consumer electronics at unbeatable, direct-to-consumer promotional prices. Get the latest tech essentials delivered right to your doorstep.</p>
-                    <div class="payment-methods">
-                        <span class="badge-cod">💸 Cash On Delivery Available</span>
-                        <span class="badge-shipping">🚚 Free Express Delivery</span>
-                    </div>
+
                 </div>
                 <div class="footer-col">
                     <h3>Quick Links</h3>
