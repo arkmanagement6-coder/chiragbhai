@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout | IKKO DIGITAL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header will be rendered here by app.js -->
+    <div id="header-placeholder"></div>
+
+    <main class="checkout-container">
+        <!-- Delivery and Payment Information Form -->
+        <div class="checkout-card">
+            <h2>Shipping & Delivery Details</h2>
+            <form id="checkout-form" onsubmit="handlePlaceOrder(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cust-name">Full Name *</label>
+                        <input type="text" id="cust-name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cust-phone">Mobile Number *</label>
+                        <input type="tel" id="cust-phone" placeholder="9876543210" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="cust-address">Delivery Address *</label>
+                        <input type="text" id="cust-address" placeholder="Flat, House no., Building, Company, Apartment" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cust-city">City *</label>
+                        <input type="text" id="cust-city" placeholder="Mumbai" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cust-state">State *</label>
+                        <input type="text" id="cust-state" placeholder="Maharashtra" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cust-pin">PIN Code *</label>
+                        <input type="text" id="cust-pin" placeholder="400001" pattern="[0-9]{6}" title="Please enter a valid 6-digit PIN code" required>
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 40px;">Select Payment Method</h2>
+                <div class="payment-methods-selector">
+                    <div class="payment-option active" id="pay-cod" onclick="selectPayment('cod')">
+                        <input type="radio" name="payment_method" id="rad-cod" checked>
+                        <div class="payment-option-label">
+                            <span class="payment-option-title">Cash on Delivery (COD)</span>
+                            <span class="payment-option-desc">Pay cash at your doorstep when products are delivered.</span>
+                        </div>
+                    </div>
+                    <div class="payment-option" id="pay-online" onclick="selectPayment('online')">
+                        <input type="radio" name="payment_method" id="rad-online">
+                        <div class="payment-option-label">
+                            <span class="payment-option-title">UPI / Credit / Debit Card (Online)</span>
+                            <span class="payment-option-desc">Fast, secure online payment methods. (Mock Payment Gateway)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="place-order-btn">Place Order (Cash On Delivery)</button>
+            </form>
+        </div>
+
+        <!-- Sidebar Summary Box -->
+        <div class="checkout-card" style="height: fit-content;">
+            <h2>Order Summary</h2>
+            <div class="checkout-summary-list" id="checkout-items-summary">
+                <!-- Items list populated here -->
+            </div>
+            
+            <div class="summary-totals">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="summary-subtotal">Rs. 0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span style="color: var(--accent-green); font-weight: 600;">FREE</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total Amount</span>
+                    <span id="summary-total-price">Rs. 0.00</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal Overlay (Hidden by default) -->
+    <div class="success-modal-overlay" id="success-modal-element" style="display: none;">
+        <div class="success-modal">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" width="45" height="45" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h2>Order Placed Successfully!</h2>
+            <p>Thank you for shopping with us. Your package will be prepared and shipped within 24 hours.</p>
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px;">Your Order ID:</div>
+            <div class="order-tracking-num" id="success-order-id">IKKO-10287-948271</div>
+            <a href="index.html" class="modal-home-btn">Continue Shopping</a>
+        </div>
+    </div>
+
+    <!-- Footer will be rendered here by app.js -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Core Scripts -->
+    <script src="app.js"></script>
+    <script>
+        let selectedPaymentMethod = 'cod';
+
+        function selectPayment(method) {
+            selectedPaymentMethod = method;
+            
+            // Toggle active classes
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
+            document.getElementById('rad-cod').checked = (method === 'cod');
+            document.getElementById('rad-online').checked = (method === 'online');
+            
+            const btn = document.querySelector('.place-order-btn');
+            
+            if (method === 'cod') {
+                document.getElementById('pay-cod').classList.add('active');
+                btn.innerText = 'Place Order (Cash On Delivery)';
+            } else {
+                document.getElementById('pay-online').classList.add('active');
+                btn.innerText = 'Pay & Place Order Online';
+            }
+        }
+
+        function renderCheckoutSummary() {
+            const summaryContainer = document.getElementById('checkout-items-summary');
+            if (!summaryContainer) return;
+
+            const cart = getCart();
+            if (cart.length === 0) {
+                // If cart is empty, redirect to index
+                alert('Your cart is empty. Please add products to cart before checkout.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            summaryContainer.innerHTML = cart.map(item => `
+                <div class="checkout-summary-item">
+                    <img src="${item.image}" alt="${item.title}">
+                    <div class="checkout-summary-item-info">
+                        <span class="checkout-summary-item-title">${item.title}</span>
+                        <span class="checkout-summary-item-qty">Qty: ${item.qty}</span>
+                    </div>
+                    <span class="checkout-summary-item-price">${item.price}</span>
+                </div>
+            `).join('');
+
+            const total = getCartTotal();
+            document.getElementById('summary-subtotal').innerText = formatPrice(total);
+            document.getElementById('summary-total-price').innerText = formatPrice(total);
+        }
+
+        function handlePlaceOrder(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('cust-name').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const address = document.getElementById('cust-address').value.trim();
+            const city = document.getElementById('cust-city').value.trim();
+            const state = document.getElementById('cust-state').value.trim();
+            const pin = document.getElementById('cust-pin').value.trim();
+
+            const cart = getCart();
+            const total = getCartTotal();
+
+            // Create a randomized order ID
+            const orderNum = Math.floor(100000 + Math.random() * 900000);
+            const orderId = `IKKO-${orderNum}`;
+
+            const order = {
+                id: orderId,
+                date: new Date().toISOString(),
+                status: 'pending',
+                paymentMethod: selectedPaymentMethod,
+                customer: {
+                    name,
+                    phone,
+                    address,
+                    city,
+                    state,
+                    pin
+                },
+                items: cart,
+                total: total
+            };
+
+            // Save order to localStorage
+            saveOrder(order);
+
+            // Set Order ID in success modal
+            document.getElementById('success-order-id').innerText = orderId;
+
+            // Clear the cart
+            clearCart();
+
+            // Display success modal
+            document.getElementById('success-modal-element').style.display = 'flex';
+        }
+
+        window.addEventListener('load', () => {
+            renderCheckoutSummary();
+        });
+    </script>
+</body>
+</html>
