@@ -210,50 +210,14 @@
         </div>
     </main>
 
-    <!-- UPI App Payment / Automated Verification Modal Overlay -->
-    <div class="verification-modal-overlay" id="payment-verification-modal" style="display: none;">
-        <div class="verification-modal">
-            <div class="vmodal-header">
-                <div class="vmodal-title-box">
-                    <span id="vmodal-app-logo"></span>
-                    <h3 id="vmodal-app-name">UPI Payment</h3>
-                </div>
-                <button class="vmodal-close-x" id="vmodal-close-btn" onclick="closePaymentModal()">&times;</button>
+    <!-- Payment Loading Redirect Overlay -->
+    <div class="verification-modal-overlay" id="payment-loading-overlay" style="display: none;">
+        <div class="verification-modal" style="max-width: 320px; text-align: center; padding: 30px; border-radius: 12px;">
+            <div class="bank-verification-loader">
+                <div class="verification-spinner"></div>
             </div>
-            
-            <!-- Interactive View (QR Scan & Pay Link) -->
-            <div class="vmodal-body" id="vmodal-interactive-state">
-                <p class="vmodal-instruction">Scan the QR code below or click the payment link to pay <strong class="text-orange" id="vmodal-total-amt">Rs. 0.00</strong> directly.</p>
-                
-                <div class="vmodal-qr-frame">
-                    <img id="vmodal-qr-image" src="" alt="Payment QR Code">
-                </div>
-
-                <!-- Deep Link Button (Visible on mobile only) -->
-                <a href="#" id="vmodal-mobile-deeplink" class="btn-primary-action-orange" style="margin-bottom: 15px; text-decoration: none; display: none;" onclick="startAutomatedCheck()">
-                    👉 Open App & Pay Now 👈
-                </a>
-
-                <!-- Confirmation Button (Visible on both desktop and mobile as fallback) -->
-                <div class="vmodal-desktop-confirm" style="margin-top: 10px;">
-                    <button class="btn-primary-action-orange" type="button" onclick="startAutomatedCheck()" style="width: 100%;">I Have Completed Payment</button>
-                </div>
-            </div>
-
-            <!-- Automated Status Checking Verification Progress View -->
-            <div class="vmodal-body" id="vmodal-checking-state" style="display: none; padding: 40px 25px; text-align: center;">
-                <div class="bank-verification-loader">
-                    <div class="verification-spinner"></div>
-                    <div class="success-checkmark-draw" style="display: none;">
-                        <svg viewBox="0 0 52 52" class="checkmark-circle-svg">
-                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                        </svg>
-                    </div>
-                </div>
-                <h4 id="loader-status-title" style="margin-top: 25px; font-family: var(--font-heading); font-size: 1.15rem; color: var(--primary);">Connecting to bank network...</h4>
-                <p id="loader-status-sub" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Please do not close this window or click back.</p>
-            </div>
+            <h4 style="margin-top: 20px; font-family: var(--font-heading); font-size: 1.1rem; color: var(--primary); margin-bottom: 5px;">Redirecting to UPI Secure Payment...</h4>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Please do not refresh or click back.</p>
         </div>
     </div>
 
@@ -274,7 +238,6 @@
     <script>
         let selectedPaymentMethod = ''; // 'phonepe', 'paytm', or 'scanpay'
         let currentWizardStep = 1;
-        let checkingTimeout = null;
 
         // Form wizard navigation
         function showWizardStep(step) {
@@ -411,133 +374,7 @@
                 alert('Please select a payment method.');
                 return;
             }
-            openPaymentModal();
-        }
 
-        function openPaymentModal() {
-            // Restore visual states
-            document.getElementById('vmodal-interactive-state').style.display = 'block';
-            document.getElementById('vmodal-checking-state').style.display = 'none';
-            document.getElementById('vmodal-close-btn').style.display = 'block';
-
-            const settings = getSettings();
-            const total = getCartTotal();
-            const orderNum = Math.floor(100000 + Math.random() * 900000);
-            const mockOrderId = `IKKO-${orderNum}`;
-            window.activeCheckoutOrderId = mockOrderId;
-
-            // Generate UPI link
-            // pa: UPI ID, pn: Payee Name, am: Amount, cu: Currency, tn: Note
-            const upiUrl = `upi://pay?pa=${settings.upiId}&pn=${encodeURIComponent(settings.merchantName)}&am=${total.toFixed(2)}&cu=INR&tn=Order-${mockOrderId}`;
-            
-            // Format specific app schemes
-            let appUpiUrl = upiUrl;
-            if (selectedPaymentMethod === 'phonepe') {
-                appUpiUrl = `phonepe://pay?pa=${settings.upiId}&pn=${encodeURIComponent(settings.merchantName)}&am=${total.toFixed(2)}&cu=INR&tn=Order-${mockOrderId}`;
-            } else if (selectedPaymentMethod === 'paytm') {
-                appUpiUrl = `paytmmp://pay?pa=${settings.upiId}&pn=${encodeURIComponent(settings.merchantName)}&am=${total.toFixed(2)}&cu=INR&tn=Order-${mockOrderId}`;
-            }
-
-            // Render QR Code image
-            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(upiUrl)}`;
-            document.getElementById('vmodal-qr-image').src = qrImageUrl;
-            document.getElementById('vmodal-total-amt').innerText = formatPrice(total);
-
-            // Setup app header logo & texts
-            const logoBox = document.getElementById('vmodal-app-logo');
-            const nameBox = document.getElementById('vmodal-app-name');
-            const mobileBtn = document.getElementById('vmodal-mobile-deeplink');
-
-            if (selectedPaymentMethod === 'phonepe') {
-                logoBox.innerHTML = `
-                    <svg viewBox="0 0 40 40" width="30" height="30">
-                        <rect width="40" height="40" rx="9" fill="#5f259f"/>
-                        <path d="M12,27 L12,13 C12,13 17,11 20,11 C23,11 26,12.5 26,16 C26,19.5 23,21.5 20,21.5 L16.5,21.5 L16.5,27 Z" fill="#ffffff"/>
-                        <path d="M16.5,14 L19.5,14 C21,14 22.2,14.5 22.2,16 C22.2,17.5 21,18 19.5,18 L16.5,18 Z" fill="#5f259f"/>
-                    </svg>
-                `;
-                nameBox.innerText = 'PhonePe Payment';
-                mobileBtn.innerText = '👉 Open PhonePe to Pay 👈';
-                mobileBtn.href = appUpiUrl;
-            } else if (selectedPaymentMethod === 'paytm') {
-                logoBox.innerHTML = `
-                    <svg viewBox="0 0 60 25" width="45" height="18" style="margin-top: 5px;">
-                        <text x="0" y="19" font-family="'Outfit', sans-serif" font-weight="900" font-size="20" fill="#00b9f5">pay</text>
-                        <text x="31" y="19" font-family="'Outfit', sans-serif" font-weight="900" font-size="20" fill="#002970">tm</text>
-                    </svg>
-                `;
-                nameBox.innerText = 'Paytm Payment';
-                mobileBtn.innerText = '👉 Open Paytm to Pay 👈';
-                mobileBtn.href = appUpiUrl;
-            } else {
-                logoBox.innerHTML = `
-                    <svg viewBox="0 0 40 40" width="26" height="26" stroke="#ff8c00" stroke-width="2.5" fill="none">
-                        <rect x="5" y="5" width="30" height="30" rx="5" stroke="#4a5568" stroke-width="2"/>
-                        <rect x="10" y="10" width="6" height="6" rx="1"/>
-                        <rect x="24" y="10" width="6" height="6" rx="1"/>
-                        <rect x="10" y="24" width="6" height="6" rx="1"/>
-                        <rect x="24" y="24" width="6" height="6" rx="1"/>
-                    </svg>
-                `;
-                nameBox.innerText = 'SCAN PAY (Any UPI App)';
-                mobileBtn.innerText = '👉 Pay with Any UPI App 👈';
-                mobileBtn.href = upiUrl;
-            }
-
-            // Detect mobile browser to show/hide direct pay button
-            const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-            if (isMobile) {
-                mobileBtn.style.display = 'block';
-            } else {
-                mobileBtn.style.display = 'none';
-            }
-
-            // Display overlay
-            document.getElementById('payment-verification-modal').style.display = 'flex';
-        }
-
-        function closePaymentModal() {
-            if (checkingTimeout) {
-                clearTimeout(checkingTimeout);
-                checkingTimeout = null;
-            }
-            document.getElementById('payment-verification-modal').style.display = 'none';
-        }
-
-        // Automated Checking Progress Animation
-        function startAutomatedCheck() {
-            document.getElementById('vmodal-interactive-state').style.display = 'none';
-            document.getElementById('vmodal-checking-state').style.display = 'block';
-            document.getElementById('vmodal-close-btn').style.display = 'none';
-
-            const titleText = document.getElementById('loader-status-title');
-            const spinner = document.querySelector('.verification-spinner');
-            const checkmark = document.querySelector('.success-checkmark-draw');
-            
-            titleText.innerText = "Connecting to bank gateway...";
-            spinner.style.display = 'block';
-            checkmark.style.display = 'none';
-
-            // Phase 1 (1.8s)
-            setTimeout(() => {
-                titleText.innerText = "Verifying transaction status with merchant account...";
-            }, 1800);
-
-            // Phase 2 (3.6s)
-            setTimeout(() => {
-                titleText.innerText = "Payment Confirmed! Generating invoice receipt...";
-                spinner.style.display = 'none';
-                checkmark.style.display = 'block';
-            }, 3600);
-
-            // Phase 3 (5s) -> Placed order & Redirect
-            checkingTimeout = setTimeout(() => {
-                submitVerifiedOrder();
-            }, 5000);
-        }
-
-        // Place order directly under Confirmed / Paid Status
-        function submitVerifiedOrder() {
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
             const address = document.getElementById('cust-address').value.trim();
@@ -545,17 +382,32 @@
             const state = document.getElementById('cust-state').value.trim();
             const pin = document.getElementById('cust-pin').value.trim();
 
-            const cart = getCart();
-            const total = getCartTotal();
-            const orderId = window.activeCheckoutOrderId || `IKKO-${Math.floor(100000 + Math.random() * 900000)}`;
+            if (!name || !phone || !address || !city || !state || !pin) {
+                alert('Shipping details are incomplete. Please edit address.');
+                showWizardStep(1);
+                return;
+            }
 
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert('Your cart is empty.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const settings = getSettings();
+            const total = getCartTotal();
+            const orderNum = Math.floor(100000 + Math.random() * 900000);
+            const orderId = `IKKO-${orderNum}`;
+
+            // Create order object with pending_payment status
             const order = {
                 id: orderId,
                 date: new Date().toISOString(),
-                status: 'pending', // Pending shipment confirmation by admin
+                status: 'pending_payment', // Awaiting status callback redirect
                 paymentMethod: 'upi',
                 upiProvider: selectedPaymentMethod,
-                utr: 'Auto-Verified', // Automatically verified
+                utr: 'Pending Gateway',
                 customer: {
                     name,
                     phone,
@@ -570,12 +422,51 @@
 
             // Save order to localStorage
             saveOrder(order);
-            
-            // Clear the cart drawer
-            clearCart();
 
-            // Redirect to receipt confirmation page
-            window.location.href = `order-confirmation.html?orderId=${orderId}`;
+            // Show loading spinner
+            document.getElementById('payment-loading-overlay').style.display = 'flex';
+
+            // Check if UPI Gateway Key exists and is not sandbox
+            if (settings.upiApiKey && settings.upiApiKey !== 'test' && settings.upiApiKey !== '') {
+                // Live mode - Call server proxy API
+                fetch('/api/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        key: settings.upiApiKey,
+                        client_txn_id: orderId,
+                        amount: total.toFixed(2),
+                        p_info: 'IKKO DIGITAL Order ' + orderId,
+                        customer_name: name,
+                        customer_mobile: phone,
+                        redirect_url: window.location.origin + '/order-confirmation.html'
+                    })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status && res.data && res.data.payment_url) {
+                        // Clear cart drawer and redirect
+                        clearCart();
+                        window.location.href = res.data.payment_url;
+                    } else {
+                        document.getElementById('payment-loading-overlay').style.display = 'none';
+                        alert('Payment Gateway Error: ' + (res.msg || 'Unable to generate payment link.'));
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('payment-loading-overlay').style.display = 'none';
+                    console.error(err);
+                    alert('Network Error connecting to server proxy.');
+                });
+            } else {
+                // Test sandbox mode - Redirect to local mock gateway
+                setTimeout(() => {
+                    clearCart();
+                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(settings.merchantName)}`;
+                }, 1000);
+            }
         }
 
         window.addEventListener('load', () => {

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Secure Checkout Gateway (Sandbox)</title>
+    <style>
+        :root {
+            --primary: #002970;
+            --accent: #00b9f5;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --bg-light: #f3f4f6;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
+        }
+        .gateway-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+        .gateway-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #001a4e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .gateway-header h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .gateway-header p {
+            margin: 5px 0 0 0;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        .merchant-badge {
+            background-color: #f3f4f6;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+        .merchant-name {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .txn-amount {
+            font-size: 1.45rem;
+            font-weight: 900;
+            color: #10b981;
+        }
+        .gateway-body {
+            padding: 25px;
+            text-align: center;
+        }
+        .qr-placeholder {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px auto;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .instruction-box {
+            background-color: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 0.8rem;
+            color: #92400e;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        .btn-pay-action {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+        .btn-pay-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-cancel-action {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid #d1d5db;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-cancel-action:hover {
+            background-color: #f9fafb;
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+        .footer-logo {
+            text-align: center;
+            padding: 15px 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="gateway-card">
+        <div class="gateway-header">
+            <h2>UPI SECURE PAY</h2>
+            <p>Unified Payments Interface - Sandbox Gateway</p>
+        </div>
+        
+        <div class="merchant-badge">
+            <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px;">PAYING TO</div>
+                <span class="merchant-name" id="merchant-name-label">IKKO DIGITAL</span>
+            </div>
+            <div class="txn-amount" id="amount-label">Rs. 0.00</div>
+        </div>
+
+        <div class="gateway-body">
+            <div class="instruction-box">
+                ⚠️ <strong>TEST SANDBOX MODE ACTIVE</strong><br>
+                Scan the QR code with any UPI app to mock a payment or click the authorize button below to simulate automated bank confirmation.
+            </div>
+
+            <div class="qr-placeholder">
+                <img id="qr-code-img" src="" alt="Payment QR Code">
+            </div>
+            
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 25px;" id="order-id-label">Order ID: IKKO-XXXXXX</p>
+
+            <button class="btn-pay-action" onclick="simulateSuccess()">Authorize Payment (Confirm)</button>
+            <button class="btn-cancel-action" onclick="simulateFailure()">Cancel Transaction</button>
+        </div>
+
+        <div class="footer-logo">
+            🔒 Secured by UPIGateway Standard 3D-Secure
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('client_txn_id');
+        const amount = urlParams.get('amount') || '0.00';
+        const merchant = urlParams.get('merchant') || 'IKKO DIGITAL';
+        
+        document.getElementById('amount-label').innerText = 'Rs. ' + parseFloat(amount).toFixed(2);
+        document.getElementById('merchant-name-label').innerText = merchant;
+        document.getElementById('order-id-label').innerText = 'Order ID: ' + orderId;
+
+        // Generate QR code matching the amount
+        const upiUrl = `upi://pay?pa=test@upi&pn=${encodeURIComponent(merchant)}&am=${parseFloat(amount).toFixed(2)}&cu=INR&tn=Order-${orderId}`;
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data=${encodeURIComponent(upiUrl)}`;
+        document.getElementById('qr-code-img').src = qrCodeUrl;
+
+        function simulateSuccess() {
+            // Redirect back to confirmation success
+            window.location.href = `order-confirmation.html?client_txn_id=${orderId}&status=success`;
+        }
+
+        function simulateFailure() {
+            // Redirect back to confirmation failure
+            window.location.href = `order-confirmation.html?client_txn_id=${orderId}&status=failure`;
+        }
+    </script>
+</body>
+</html>

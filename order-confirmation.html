@@ -199,7 +199,8 @@
             if (!card) return;
 
             const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('orderId');
+            let orderId = urlParams.get('orderId') || urlParams.get('client_txn_id');
+            const status = urlParams.get('status'); // 'success', 'failure'
 
             if (!orderId) {
                 card.innerHTML = `
@@ -213,14 +214,45 @@
             }
 
             const orders = getOrders();
-            const order = orders.find(o => o.id === orderId);
+            const orderIndex = orders.findIndex(o => o.id === orderId);
 
-            if (!order) {
+            if (orderIndex === -1) {
                 card.innerHTML = `
                     <div style="text-align: center; padding: 40px 0;">
                         <h2 style="color: var(--accent); font-family: var(--font-heading);">Order Not Found</h2>
                         <p style="color: var(--text-muted); margin: 15px 0 30px 0;">The order ID <strong>${orderId}</strong> was not found in our database.</p>
                         <a href="index.html" class="confirm-home-btn">Return to Storefront</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const order = orders[orderIndex];
+
+            // Reconcile status callback if present
+            if (status) {
+                if (status === 'success') {
+                    order.status = 'pending';
+                    order.utr = 'Real-Time Verified';
+                } else {
+                    order.status = 'cancelled';
+                    order.utr = 'Payment Failed';
+                }
+                orders[orderIndex] = order;
+                localStorage.setItem('ikko_orders', JSON.stringify(orders));
+            }
+
+            // Render Payment Failed layout if status is failure or order cancelled
+            if (order.status === 'cancelled' || order.utr === 'Payment Failed') {
+                card.innerHTML = `
+                    <div style="text-align: center; padding: 40px 0;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #fed7d7; color: #e53e3e; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                            <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="3" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </div>
+                        <h2 style="color: #e53e3e; font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800;">Payment Failed!</h2>
+                        <p style="color: var(--text-muted); margin: 15px auto 25px auto; max-width: 380px;">Your transaction could not be authorized by your bank. Any amount deducted will be refunded back to your account automatically.</p>
+                        <div class="order-badge-id" style="margin-bottom: 25px; background-color: #f7fafc; color: var(--text-dark);">Order ID: ${order.id}</div>
+                        <a href="checkout.html" class="confirm-home-btn" style="background-color: var(--accent); color: white; border: none;">Retry Checkout & Payment</a>
                     </div>
                 `;
                 return;
@@ -244,7 +276,9 @@
                 paymentText = 'Cash on Delivery (COD)';
             } else if (order.paymentMethod === 'upi') {
                 const providerLabel = order.upiProvider ? (order.upiProvider === 'phonepe' ? 'PhonePe' : (order.upiProvider === 'paytm' ? 'Paytm' : 'SCAN PAY')) : 'UPI QR';
-                if (order.utr === 'Auto-Verified') {
+                if (order.utr === 'Real-Time Verified') {
+                    paymentText = `${providerLabel} (Real-Time Confirmed)`;
+                } else if (order.utr === 'Auto-Verified') {
                     paymentText = `${providerLabel} (Auto-Verified)`;
                 } else {
                     paymentText = `${providerLabel} (UTR: ${order.utr || 'Pending'})`;
@@ -277,7 +311,7 @@
                         <h3>Billing & Payment</h3>
                         <p>
                             <strong>Method:</strong> ${paymentText}<br>
-                            <strong>Status:</strong> ${order.utr === 'Auto-Verified' ? 'Paid & Confirmed' : (order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery')}<br>
+                            <strong>Status:</strong> ${order.utr === 'Real-Time Verified' || order.utr === 'Auto-Verified' ? 'Paid & Confirmed' : (order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery')}<br>
                             <strong>Expected Delivery:</strong> 3-5 Business Days
                         </p>
                     </div>
