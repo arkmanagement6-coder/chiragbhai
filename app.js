@@ -485,7 +485,7 @@ function clearCart() {
 function getCartTotal() {
     const cart = getCart();
     return cart.reduce((total, item) => {
-        const priceNum = parseInt(item.price.replace(/[^0-9]/g, '')) || 999;
+        const priceNum = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 999;
         return total + (priceNum * item.qty);
     }, 0);
 }

@@ -195,14 +195,11 @@
             // Save order to localStorage
             saveOrder(order);
 
-            // Set Order ID in success modal
-            document.getElementById('success-order-id').innerText = orderId;
-
             // Clear the cart
             clearCart();
 
-            // Display success modal
-            document.getElementById('success-modal-element').style.display = 'flex';
+            // Redirect to order confirmation page
+            window.location.href = `order-confirmation.html?orderId=${orderId}`;
         }
 
         window.addEventListener('load', () => {

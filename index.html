@@ -94,8 +94,8 @@
 
             grid.innerHTML = filteredProducts.map(p => {
                 // Compute saved percentage
-                const priceNum = parseInt(p.price.replace(/[^0-9]/g, '')) || 999;
-                const compareNum = parseInt(p.comparePrice.replace(/[^0-9]/g, '')) || 59900;
+                const priceNum = parseFloat(p.price.replace(/[^0-9.]/g, '')) || 999;
+                const compareNum = parseFloat(p.comparePrice.replace(/[^0-9.]/g, '')) || 59900;
                 const percentSaved = Math.round(((compareNum - priceNum) / compareNum) * 100);
 
                 let badgeHtml = '';
