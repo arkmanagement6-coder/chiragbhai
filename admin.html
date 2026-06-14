@@ -563,8 +563,8 @@
             document.getElementById('form-title').value = product.title;
             
             // Strip non-numerical values for easy editing
-            const priceVal = parseFloat(product.price.replace(/[^0-9.]/g, '')) || 999;
-            const compareVal = parseFloat(product.comparePrice.replace(/[^0-9.]/g, '')) || 59900;
+            const priceVal = parsePrice(product.price) || 999;
+            const compareVal = parsePrice(product.comparePrice) || 59900;
             
             document.getElementById('form-price').value = priceVal;
             document.getElementById('form-compare').value = compareVal;

@@ -237,14 +237,14 @@
 
             if (sortVal === 'price-low') {
                 sortedProducts.sort((a, b) => {
-                    const priceA = parseFloat(a.price.replace(/[^0-9.]/g, '')) || 999;
-                    const priceB = parseFloat(b.price.replace(/[^0-9.]/g, '')) || 999;
+                    const priceA = parsePrice(a.price) || 999;
+                    const priceB = parsePrice(b.price) || 999;
                     return priceA - priceB;
                 });
             } else if (sortVal === 'price-high') {
                 sortedProducts.sort((a, b) => {
-                    const priceA = parseFloat(a.price.replace(/[^0-9.]/g, '')) || 999;
-                    const priceB = parseFloat(b.price.replace(/[^0-9.]/g, '')) || 999;
+                    const priceA = parsePrice(a.price) || 999;
+                    const priceB = parsePrice(b.price) || 999;
                     return priceB - priceA;
                 });
             } else if (sortVal === 'title-az') {
@@ -272,8 +272,8 @@
             }
 
             grid.innerHTML = sortedProducts.map(p => {
-                const priceNum = parseFloat(p.price.replace(/[^0-9.]/g, '')) || 999;
-                const compareNum = parseFloat(p.comparePrice.replace(/[^0-9.]/g, '')) || 59900;
+                const priceNum = parsePrice(p.price) || 999;
+                const compareNum = parsePrice(p.comparePrice) || 59900;
                 const percentSaved = Math.round(((compareNum - priceNum) / compareNum) * 100);
 
                 let badgeHtml = '';

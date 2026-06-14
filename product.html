@@ -118,8 +118,8 @@
             // Set page title
             document.title = `${selectedProduct.title} | IKKO DIGITAL`;
 
-            const priceNum = parseFloat(selectedProduct.price.replace(/[^0-9.]/g, '')) || 999;
-            const compareNum = parseFloat(selectedProduct.comparePrice.replace(/[^0-9.]/g, '')) || 59900;
+            const priceNum = parsePrice(selectedProduct.price) || 999;
+            const compareNum = parsePrice(selectedProduct.comparePrice) || 59900;
             const percentSaved = Math.round(((compareNum - priceNum) / compareNum) * 100);
             
             const specs = selectedProduct.specs && Array.isArray(selectedProduct.specs) && selectedProduct.specs.length > 0 ? selectedProduct.specs : generateSpecs(selectedProduct);
@@ -243,8 +243,8 @@
                 .slice(0, 4);
 
             grid.innerHTML = related.map(p => {
-                const priceNum = parseFloat(p.price.replace(/[^0-9.]/g, '')) || 999;
-                const compareNum = parseFloat(p.comparePrice.replace(/[^0-9.]/g, '')) || 59900;
+                const priceNum = parsePrice(p.price) || 999;
+                const compareNum = parsePrice(p.comparePrice) || 59900;
                 const percentSaved = Math.round(((compareNum - priceNum) / compareNum) * 100);
 
                 let badgeHtml = '';

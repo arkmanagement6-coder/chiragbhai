@@ -485,8 +485,7 @@ function clearCart() {
 function getCartTotal() {
     const cart = getCart();
     return cart.reduce((total, item) => {
-        const priceNum = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 999;
-        return total + (priceNum * item.qty);
+        return total + (parsePrice(item.price) * item.qty);
     }, 0);
 }
 
@@ -498,6 +497,13 @@ function getCartCount() {
 // Formatting utilities
 function formatPrice(num) {
     return 'Rs. ' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parsePrice(priceStr) {
+    if (!priceStr) return 0;
+    const cleaned = priceStr.replace(/[^\d.]/g, '').replace(/^\./, '');
+    const val = parseFloat(cleaned);
+    return isNaN(val) ? 0 : val;
 }
 
 // Header and Footer Rendering
