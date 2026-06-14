@@ -244,7 +244,11 @@
                 paymentText = 'Cash on Delivery (COD)';
             } else if (order.paymentMethod === 'upi') {
                 const providerLabel = order.upiProvider ? (order.upiProvider === 'phonepe' ? 'PhonePe' : (order.upiProvider === 'paytm' ? 'Paytm' : 'SCAN PAY')) : 'UPI QR';
-                paymentText = `${providerLabel} Payment (UTR: ${order.utr || 'Pending'})`;
+                if (order.utr === 'Auto-Verified') {
+                    paymentText = `${providerLabel} (Auto-Verified)`;
+                } else {
+                    paymentText = `${providerLabel} (UTR: ${order.utr || 'Pending'})`;
+                }
             } else {
                 paymentText = 'Online Payment';
             }
@@ -273,7 +277,7 @@
                         <h3>Billing & Payment</h3>
                         <p>
                             <strong>Method:</strong> ${paymentText}<br>
-                            <strong>Status:</strong> ${order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery'}<br>
+                            <strong>Status:</strong> ${order.utr === 'Auto-Verified' ? 'Paid & Confirmed' : (order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery')}<br>
                             <strong>Expected Delivery:</strong> 3-5 Business Days
                         </p>
                     </div>

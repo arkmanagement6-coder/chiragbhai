@@ -210,7 +210,7 @@
         </div>
     </main>
 
-    <!-- UPI App Payment / Verification Modal Overlay -->
+    <!-- UPI App Payment / Automated Verification Modal Overlay -->
     <div class="verification-modal-overlay" id="payment-verification-modal" style="display: none;">
         <div class="verification-modal">
             <div class="vmodal-header">
@@ -218,10 +218,11 @@
                     <span id="vmodal-app-logo"></span>
                     <h3 id="vmodal-app-name">UPI Payment</h3>
                 </div>
-                <button class="vmodal-close-x" onclick="closePaymentModal()">&times;</button>
+                <button class="vmodal-close-x" id="vmodal-close-btn" onclick="closePaymentModal()">&times;</button>
             </div>
             
-            <div class="vmodal-body">
+            <!-- Interactive View (QR Scan & Pay Link) -->
+            <div class="vmodal-body" id="vmodal-interactive-state">
                 <p class="vmodal-instruction">Scan the QR code below or click the payment link to pay <strong class="text-orange" id="vmodal-total-amt">Rs. 0.00</strong> directly.</p>
                 
                 <div class="vmodal-qr-frame">
@@ -229,17 +230,29 @@
                 </div>
 
                 <!-- Deep Link Button (Visible on mobile only) -->
-                <a href="#" id="vmodal-mobile-deeplink" class="btn-primary-action-orange" style="margin-bottom: 20px; text-decoration: none; display: none;">
+                <a href="#" id="vmodal-mobile-deeplink" class="btn-primary-action-orange" style="margin-bottom: 15px; text-decoration: none; display: none;" onclick="startAutomatedCheck()">
                     👉 Open App & Pay Now 👈
                 </a>
 
-                <div class="vmodal-utr-form">
-                    <label for="vmodal-utr-input" class="utr-label">12-Digit UPI UTR / Transaction Ref No *</label>
-                    <input type="text" id="vmodal-utr-input" placeholder="e.g. 123456789012" pattern="[0-9]{12}" maxlength="12" required>
-                    <p class="utr-subtext">Find the 12-digit transaction ID in your GPay/Paytm/PhonePe receipt after completing payment.</p>
-                    
-                    <button class="btn-primary-action-orange" type="button" onclick="submitVerifiedOrder()" style="width: 100%; margin-top: 15px;">Verify & Confirm Order</button>
+                <!-- Confirmation Button (Visible on both desktop and mobile as fallback) -->
+                <div class="vmodal-desktop-confirm" style="margin-top: 10px;">
+                    <button class="btn-primary-action-orange" type="button" onclick="startAutomatedCheck()" style="width: 100%;">I Have Completed Payment</button>
                 </div>
+            </div>
+
+            <!-- Automated Status Checking Verification Progress View -->
+            <div class="vmodal-body" id="vmodal-checking-state" style="display: none; padding: 40px 25px; text-align: center;">
+                <div class="bank-verification-loader">
+                    <div class="verification-spinner"></div>
+                    <div class="success-checkmark-draw" style="display: none;">
+                        <svg viewBox="0 0 52 52" class="checkmark-circle-svg">
+                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                </div>
+                <h4 id="loader-status-title" style="margin-top: 25px; font-family: var(--font-heading); font-size: 1.15rem; color: var(--primary);">Connecting to bank network...</h4>
+                <p id="loader-status-sub" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Please do not close this window or click back.</p>
             </div>
         </div>
     </div>
@@ -261,6 +274,7 @@
     <script>
         let selectedPaymentMethod = ''; // 'phonepe', 'paytm', or 'scanpay'
         let currentWizardStep = 1;
+        let checkingTimeout = null;
 
         // Form wizard navigation
         function showWizardStep(step) {
@@ -401,6 +415,11 @@
         }
 
         function openPaymentModal() {
+            // Restore visual states
+            document.getElementById('vmodal-interactive-state').style.display = 'block';
+            document.getElementById('vmodal-checking-state').style.display = 'none';
+            document.getElementById('vmodal-close-btn').style.display = 'block';
+
             const settings = getSettings();
             const total = getCartTotal();
             const orderNum = Math.floor(100000 + Math.random() * 900000);
@@ -475,23 +494,50 @@
 
             // Display overlay
             document.getElementById('payment-verification-modal').style.display = 'flex';
-            
-            // Clear input
-            document.getElementById('vmodal-utr-input').value = '';
         }
 
         function closePaymentModal() {
+            if (checkingTimeout) {
+                clearTimeout(checkingTimeout);
+                checkingTimeout = null;
+            }
             document.getElementById('payment-verification-modal').style.display = 'none';
         }
 
-        // Place order after UTR submission
-        function submitVerifiedOrder() {
-            const utr = document.getElementById('vmodal-utr-input').value.trim();
-            if (!utr || utr.length !== 12 || isNaN(utr)) {
-                alert('Please enter a valid 12-digit transaction UTR reference number.');
-                return;
-            }
+        // Automated Checking Progress Animation
+        function startAutomatedCheck() {
+            document.getElementById('vmodal-interactive-state').style.display = 'none';
+            document.getElementById('vmodal-checking-state').style.display = 'block';
+            document.getElementById('vmodal-close-btn').style.display = 'none';
 
+            const titleText = document.getElementById('loader-status-title');
+            const spinner = document.querySelector('.verification-spinner');
+            const checkmark = document.querySelector('.success-checkmark-draw');
+            
+            titleText.innerText = "Connecting to bank gateway...";
+            spinner.style.display = 'block';
+            checkmark.style.display = 'none';
+
+            // Phase 1 (1.8s)
+            setTimeout(() => {
+                titleText.innerText = "Verifying transaction status with merchant account...";
+            }, 1800);
+
+            // Phase 2 (3.6s)
+            setTimeout(() => {
+                titleText.innerText = "Payment Confirmed! Generating invoice receipt...";
+                spinner.style.display = 'none';
+                checkmark.style.display = 'block';
+            }, 3600);
+
+            // Phase 3 (5s) -> Placed order & Redirect
+            checkingTimeout = setTimeout(() => {
+                submitVerifiedOrder();
+            }, 5000);
+        }
+
+        // Place order directly under Confirmed / Paid Status
+        function submitVerifiedOrder() {
             const name = document.getElementById('cust-name').value.trim();
             const phone = document.getElementById('cust-phone').value.trim();
             const address = document.getElementById('cust-address').value.trim();
@@ -506,10 +552,10 @@
             const order = {
                 id: orderId,
                 date: new Date().toISOString(),
-                status: 'pending',
+                status: 'pending', // Pending shipment confirmation by admin
                 paymentMethod: 'upi',
-                upiProvider: selectedPaymentMethod, // 'phonepe', 'paytm', or 'scanpay'
-                utr: utr,
+                upiProvider: selectedPaymentMethod,
+                utr: 'Auto-Verified', // Automatically verified
                 customer: {
                     name,
                     phone,
@@ -522,13 +568,13 @@
                 total: total
             };
 
-            // Save to localStorage
+            // Save order to localStorage
             saveOrder(order);
             
-            // Clear checkout cart drawer
+            // Clear the cart drawer
             clearCart();
 
-            // Redirect to receipt confirmation
+            // Redirect to receipt confirmation page
             window.location.href = `order-confirmation.html?orderId=${orderId}`;
         }
 

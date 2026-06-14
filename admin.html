@@ -423,7 +423,11 @@
                     <strong>${o.customer.name}</strong><br>
                     📞 ${o.customer.phone}<br>
                     🏠 ${o.customer.address}, ${o.customer.city}, ${o.customer.state} - ${o.customer.pin}
-                    ${o.paymentMethod === 'upi' ? `<div style="margin-top: 6px; padding: 4px 8px; background-color: #feebc8; color: #c05621; font-size: 0.8rem; border-radius: 4px; font-weight: 700; border: 1px solid #fbd38d;">${providerLabel} UTR: ${o.utr || 'N/A'}</div>` : ''}
+                    ${o.paymentMethod === 'upi' ? `
+                        <div style="margin-top: 6px; padding: 4px 8px; background-color: ${o.utr === 'Auto-Verified' ? '#c6f6d5' : '#feebc8'}; color: ${o.utr === 'Auto-Verified' ? '#22543d' : '#c05621'}; font-size: 0.8rem; border-radius: 4px; font-weight: 700; border: 1px solid ${o.utr === 'Auto-Verified' ? '#9ae6b4' : '#fbd38d'};">
+                            ${o.utr === 'Auto-Verified' ? `✅ Payment Auto-Verified` : `${providerLabel} UTR: ${o.utr || 'N/A'}`}
+                        </div>
+                    ` : ''}
                 `;
 
                 // Render dynamic status changes
