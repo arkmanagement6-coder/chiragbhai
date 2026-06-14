@@ -458,11 +458,22 @@
                 })
                 .then(res => res.json())
                 .then(res => {
-                    if (res.success && res.data && res.data.checkoutUrl) {
+                    // Extremely robust check for success status or message
+                    const isSuccess = res.success === true || 
+                                      res.status === 'success' || 
+                                      res.status === 'SUCCESS' || 
+                                      res.status === 'SUCCESSFUL' ||
+                                      res.statusCode === 200 ||
+                                      (res.message && res.message.toLowerCase().includes('success'));
+                                      
+                    const checkoutUrl = (res.data && res.data.checkoutUrl) || res.checkoutUrl || (res.data && res.data.paymentUrl) || res.paymentUrl;
+                    const clientSecret = (res.data && res.data.clientSecret) || res.clientSecret;
+
+                    if (isSuccess && checkoutUrl) {
                         clearCart();
-                        let redirectUrl = res.data.checkoutUrl;
-                        if (res.data.clientSecret) {
-                            redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + 'clientSecret=' + encodeURIComponent(res.data.clientSecret);
+                        let redirectUrl = checkoutUrl;
+                        if (clientSecret) {
+                            redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + 'clientSecret=' + encodeURIComponent(clientSecret);
                         }
                         window.location.href = redirectUrl;
                     } else {
