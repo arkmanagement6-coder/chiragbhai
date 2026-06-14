@@ -501,6 +501,7 @@ function formatPrice(num) {
 }
 
 // Header and Footer Rendering
+// Header and Footer Rendering
 function renderHeader() {
     const headerPlaceholder = document.getElementById('header-placeholder');
     if (!headerPlaceholder) return;
@@ -509,17 +510,26 @@ function renderHeader() {
     
     headerPlaceholder.innerHTML = `
         <div class="announcement-bar">
-            <div class="announcement-bar__text">🎉 SPECIAL OFFER: ALL CONSUMER ELECTRONICS FLAT Rs. 999.00! FREE SHIPPING + COD AVAILABLE 🎉</div>
+            <div class="announcement-bar__text">Up to 90% Off Select Tablets & Smart Phone | Free Shipping All Over India |</div>
+        </div>
+        <div class="sub-header-nav">
+            <div class="sub-header-container">
+                <a href="index.html">Search</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-of-service.html">Terms of Service</a>
+                <a href="shipping-policy.html">Shipping Policy</a>
+                <a href="refund-policy.html">Refund Policy</a>
+                <a href="about-us.html">About Us</a>
+                <a href="contact-information.html">Contact Us</a>
+            </div>
         </div>
         <header class="main-header">
             <div class="header-container">
-                <a href="index.html" class="logo-link">
-                    <span class="logo-bold">IKKO</span><span class="logo-accent">DIGITAL</span>
-                </a>
+                <a href="index.html" class="logo-link">IKKO DIGITAL</a>
                 
                 <div class="search-bar-container">
                     <form action="index.html" method="GET" class="search-form" onsubmit="event.preventDefault();">
-                        <input type="text" id="header-search" placeholder="Search for iPads, AirPods, earbuds..." autocomplete="off">
+                        <input type="text" id="header-search" placeholder="What are you looking for?" autocomplete="off">
                         <button type="submit" class="search-btn">
                             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         </button>
@@ -530,18 +540,26 @@ function renderHeader() {
                 <div class="header-actions">
                     <a href="admin.html" class="header-action-btn admin-portal-link" title="Admin Panel">
                         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span class="action-btn-text">Admin</span>
+                        <span class="action-btn-text">Login</span>
                     </a>
                     <button class="header-action-btn cart-toggle-btn" onclick="openCartDrawer()" title="View Cart">
                         <div class="cart-icon-wrapper">
-                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
                             <span class="cart-badge" id="cart-badge-count">${cartCount}</span>
                         </div>
-                        <span class="action-btn-text">Cart</span>
                     </button>
                 </div>
             </div>
         </header>
+        <nav class="lower-nav">
+            <div class="lower-nav-container">
+                <a href="index.html" class="nav-item">HOME</a>
+                <a href="index.html" class="nav-item">CATALOG</a>
+                <a href="index.html?tab=all" class="nav-item">SHOP ALL</a>
+                <a href="index.html?tab=tablets" class="nav-item">TABLETS</a>
+                <a href="product.html?id=8270415000010" class="nav-item">SMART PHONE</a>
+            </div>
+        </nav>
     `;
     
     // Hook up search dropdown handler
@@ -606,18 +624,19 @@ function renderFooter() {
                     <h3>Quick Links</h3>
                     <ul>
                         <li><a href="index.html">Home</a></li>
-                        <li><a href="index.html?tab=hot">Hot Products</a></li>
-                        <li><a href="index.html?tab=best">Best Price Deals</a></li>
+                        <li><a href="index.html?tab=all">Shop All</a></li>
                         <li><a href="admin.html">Admin Dashboard</a></li>
+                        <li><a href="about-us.html">About Us</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h3>Customer Care</h3>
                     <ul>
-                        <li><a href="#">Track Order</a></li>
-                        <li><a href="#">Return Policy</a></li>
-                        <li><a href="#">Support Center</a></li>
-                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-of-service.html">Terms of Service</a></li>
+                        <li><a href="shipping-policy.html">Shipping Policy</a></li>
+                        <li><a href="refund-policy.html">Refund Policy</a></li>
+                        <li><a href="contact-information.html">Contact Us</a></li>
                     </ul>
                 </div>
                 <div class="footer-col footer-newsletter">
