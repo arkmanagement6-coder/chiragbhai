@@ -554,10 +554,10 @@ function renderHeader() {
         <nav class="lower-nav">
             <div class="lower-nav-container">
                 <a href="index.html" class="nav-item">HOME</a>
-                <a href="index.html" class="nav-item">CATALOG</a>
-                <a href="index.html?tab=all" class="nav-item">SHOP ALL</a>
-                <a href="index.html?tab=tablets" class="nav-item">TABLETS</a>
-                <a href="product.html?id=8270415000010" class="nav-item">SMART PHONE</a>
+                <a href="collections.html?type=all" class="nav-item">CATALOG</a>
+                <a href="collections.html?type=all" class="nav-item">SHOP ALL</a>
+                <a href="collections.html?type=tablets" class="nav-item">TABLETS</a>
+                <a href="collections.html?type=smart-phone" class="nav-item">SMART PHONE</a>
             </div>
         </nav>
     `;
