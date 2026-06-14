@@ -417,11 +417,13 @@
                     </div>
                 `).join('');
 
+                const providerLabel = o.upiProvider ? (o.upiProvider === 'phonepe' ? 'PhonePe' : (o.upiProvider === 'paytm' ? 'Paytm' : 'SCAN PAY')) : 'UPI QR';
+
                 const customerHtml = `
                     <strong>${o.customer.name}</strong><br>
                     📞 ${o.customer.phone}<br>
                     🏠 ${o.customer.address}, ${o.customer.city}, ${o.customer.state} - ${o.customer.pin}
-                    ${o.paymentMethod === 'upi' ? `<div style="margin-top: 6px; padding: 4px 8px; background-color: #feebc8; color: #c05621; font-size: 0.8rem; border-radius: 4px; font-weight: 700; border: 1px solid #fbd38d;">UTR Verification: ${o.utr || 'N/A'}</div>` : ''}
+                    ${o.paymentMethod === 'upi' ? `<div style="margin-top: 6px; padding: 4px 8px; background-color: #feebc8; color: #c05621; font-size: 0.8rem; border-radius: 4px; font-weight: 700; border: 1px solid #fbd38d;">${providerLabel} UTR: ${o.utr || 'N/A'}</div>` : ''}
                 `;
 
                 // Render dynamic status changes
@@ -440,7 +442,7 @@
                         <td>
                             <strong>${o.id}</strong><br>
                             <span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; background-color: ${o.paymentMethod === 'upi' ? '#ebf8ff' : '#f7fafc'}; color: ${o.paymentMethod === 'upi' ? '#2b6cb0' : '#4a5568'}; display: inline-block; margin-top: 4px; border: 1px solid ${o.paymentMethod === 'upi' ? '#bee3f8' : '#e2e8f0'}; text-transform: uppercase;">
-                                ${o.paymentMethod === 'upi' ? 'UPI QR' : 'COD'}
+                                ${o.paymentMethod === 'upi' ? providerLabel : 'COD'}
                             </span>
                         </td>
                         <td>${new Date(o.date).toLocaleString()}</td>

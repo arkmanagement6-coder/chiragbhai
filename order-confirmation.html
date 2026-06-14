@@ -243,7 +243,8 @@
             if (order.paymentMethod === 'cod') {
                 paymentText = 'Cash on Delivery (COD)';
             } else if (order.paymentMethod === 'upi') {
-                paymentText = `UPI QR Payment (UTR: ${order.utr || 'Pending'})`;
+                const providerLabel = order.upiProvider ? (order.upiProvider === 'phonepe' ? 'PhonePe' : (order.upiProvider === 'paytm' ? 'Paytm' : 'SCAN PAY')) : 'UPI QR';
+                paymentText = `${providerLabel} Payment (UTR: ${order.utr || 'Pending'})`;
             } else {
                 paymentText = 'Online Payment';
             }
