@@ -426,9 +426,57 @@
             // Show loading spinner
             document.getElementById('payment-loading-overlay').style.display = 'flex';
 
-            // Check if UPI Gateway Key exists and is not sandbox
-            if (settings.upiApiKey && settings.upiApiKey !== 'test' && settings.upiApiKey !== '') {
-                // Live mode - Call server proxy API
+            // Check if SabPaisa integration is enabled
+            if (settings.sabpaisaEnabled) {
+                if (settings.sabpaisaMode === 'test') {
+                    // Sandbox mode - Redirect to local mock gateway
+                    setTimeout(() => {
+                        clearCart();
+                        window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(settings.merchantName || 'IKKO DIGITAL')}`;
+                    }, 1000);
+                    return;
+                }
+
+                // Call server proxy API for SabPaisa
+                fetch('/api/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        gateway: 'sabpaisa',
+                        clientCode: settings.sabpaisaClientCode,
+                        apiKey: settings.sabpaisaApiKey,
+                        secretKey: settings.sabpaisaSecretKey,
+                        mode: settings.sabpaisaMode,
+                        client_txn_id: orderId,
+                        amount: total.toFixed(2),
+                        customer_name: name,
+                        customer_mobile: phone,
+                        redirect_url: window.location.origin + '/order-confirmation.html'
+                    })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success && res.data && res.data.checkoutUrl) {
+                        clearCart();
+                        let redirectUrl = res.data.checkoutUrl;
+                        if (res.data.clientSecret) {
+                            redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + 'clientSecret=' + encodeURIComponent(res.data.clientSecret);
+                        }
+                        window.location.href = redirectUrl;
+                    } else {
+                        document.getElementById('payment-loading-overlay').style.display = 'none';
+                        alert('SabPaisa Gateway Error: ' + (res.message || res.msg || 'Unable to generate checkout link.'));
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('payment-loading-overlay').style.display = 'none';
+                    console.error(err);
+                    alert('Network Error connecting to SabPaisa server proxy.');
+                });
+            } else if (settings.upiApiKey && settings.upiApiKey !== 'test' && settings.upiApiKey !== '') {
+                // Fallback UPIGateway Live mode - Call server proxy API
                 fetch('/api/create-payment', {
                     method: 'POST',
                     headers: {
@@ -447,7 +495,6 @@
                 .then(res => res.json())
                 .then(res => {
                     if (res.status && res.data && res.data.payment_url) {
-                        // Clear cart drawer and redirect
                         clearCart();
                         window.location.href = res.data.payment_url;
                     } else {
@@ -464,7 +511,7 @@
                 // Test sandbox mode - Redirect to local mock gateway
                 setTimeout(() => {
                     clearCart();
-                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(settings.merchantName)}`;
+                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(settings.merchantName || 'IKKO DIGITAL')}`;
                 }, 1000);
             }
         }

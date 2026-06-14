@@ -404,7 +404,12 @@ function dbInit() {
         localStorage.setItem('ikko_settings', JSON.stringify({
             upiEnabled: true,
             upiId: 'test@upi',
-            merchantName: 'IKKO DIGITAL'
+            merchantName: 'IKKO DIGITAL',
+            sabpaisaEnabled: true,
+            sabpaisaClientCode: 'JARV1',
+            sabpaisaApiKey: 'sp_R89a1KoXYB9MCf6ODyxjcujarerdUWbnyvv11XpH-kc',
+            sabpaisaSecretKey: 'sec_0w0qHWovFvgZkTa5Ol_O_Vx4xGgBJjlYZtY1bVw8oUE',
+            sabpaisaMode: 'live'
         }));
     }
 }
@@ -412,7 +417,17 @@ function dbInit() {
 // Settings Helpers
 function getSettings() {
     dbInit();
-    return JSON.parse(localStorage.getItem('ikko_settings'));
+    const settings = JSON.parse(localStorage.getItem('ikko_settings')) || {};
+    // Ensure SabPaisa fields exist for migration
+    if (settings.sabpaisaEnabled === undefined) {
+        settings.sabpaisaEnabled = true;
+        settings.sabpaisaClientCode = 'JARV1';
+        settings.sabpaisaApiKey = 'sp_R89a1KoXYB9MCf6ODyxjcujarerdUWbnyvv11XpH-kc';
+        settings.sabpaisaSecretKey = 'sec_0w0qHWovFvgZkTa5Ol_O_Vx4xGgBJjlYZtY1bVw8oUE';
+        settings.sabpaisaMode = 'live';
+        localStorage.setItem('ikko_settings', JSON.stringify(settings));
+    }
+    return settings;
 }
 
 function saveSettings(settings) {

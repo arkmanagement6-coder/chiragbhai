@@ -199,8 +199,12 @@
             if (!card) return;
 
             const urlParams = new URLSearchParams(window.location.search);
-            let orderId = urlParams.get('orderId') || urlParams.get('client_txn_id');
-            const status = urlParams.get('status'); // 'success', 'failure'
+            let orderId = urlParams.get('orderId') || urlParams.get('client_txn_id') || urlParams.get('merchant_txn_id');
+            let status = urlParams.get('status'); // 'success', 'failure', 'SUCCESS', etc.
+
+            if (status) {
+                status = status.toLowerCase();
+            }
 
             if (!orderId) {
                 card.innerHTML = `
@@ -231,10 +235,10 @@
 
             // Reconcile status callback if present
             if (status) {
-                if (status === 'success') {
+                if (status === 'success' || status === 'successful') {
                     order.status = 'pending';
                     order.utr = 'Real-Time Verified';
-                } else {
+                } else if (status === 'failure' || status === 'failed') {
                     order.status = 'cancelled';
                     order.utr = 'Payment Failed';
                 }

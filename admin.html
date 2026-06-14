@@ -188,35 +188,58 @@
                 </div>
 
                 <div class="settings-card" style="background-color: white; border-radius: 8px; border: 1px solid var(--border-color); padding: 30px; max-width: 600px; margin-top: 20px; box-shadow: var(--shadow-sm);">
-                    <h2 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">UPI QR Code Configuration</h2>
                     <form id="store-settings-form" onsubmit="handleSaveSettings(event)">
+                        <!-- SabPaisa Gateway Config -->
+                        <h2 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">SabPaisa Payment Gateway</h2>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: var(--primary);">
+                                <input type="checkbox" id="setting-sabpaisa-enabled" style="width: 18px; height: 18px;">
+                                Enable SabPaisa Checkout Integration
+                            </label>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; margin-left: 28px;">If enabled, checkout routing will go through SabPaisa's PG 3.0 secure page.</p>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label for="setting-sabpaisa-clientcode" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">Client Code (merchantId) *</label>
+                            <input type="text" id="setting-sabpaisa-clientcode" required placeholder="e.g. JARV1" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label for="setting-sabpaisa-apikey" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">API Key (X-Api-Key) *</label>
+                            <input type="text" id="setting-sabpaisa-apikey" required placeholder="sp_..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label for="setting-sabpaisa-secretkey" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">Secret Key (For Checksum) *</label>
+                            <input type="text" id="setting-sabpaisa-secretkey" required placeholder="sec_..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
+                        </div>
+
+                        <div style="margin-bottom: 25px;">
+                            <label for="setting-sabpaisa-mode" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">Environment Mode *</label>
+                            <select id="setting-sabpaisa-mode" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box; background: white;">
+                                <option value="test">Sandbox / Testing (UAT)</option>
+                                <option value="live">Production / Live</option>
+                            </select>
+                        </div>
+
+                        <h2 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--primary); margin-top: 30px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Fallback UPI QR Configuration</h2>
                         <div style="margin-bottom: 20px;">
                             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: var(--primary);">
                                 <input type="checkbox" id="setting-upi-enabled" style="width: 18px; height: 18px;">
-                                Enable UPI Dynamic QR Code Payment
+                                Enable Fallback UPI QR
                             </label>
-                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; margin-left: 28px;">If checked, customers can pay using a dynamically generated QR code at checkout.</p>
                         </div>
-
                         <div style="margin-bottom: 20px;">
-                            <label for="setting-upi-id" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">Merchant UPI ID / VPA *</label>
-                            <input type="text" id="setting-upi-id" required placeholder="e.g. merchant@okaxis" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
-                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Transactions will be routed directly to this UPI address.</p>
+                            <label for="setting-upi-id" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">Merchant UPI ID / VPA</label>
+                            <input type="text" id="setting-upi-id" placeholder="e.g. merchant@okaxis" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
                         </div>
-
                         <div style="margin-bottom: 25px;">
-                            <label for="setting-merchant-name" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">Business / Account Name *</label>
-                            <input type="text" id="setting-merchant-name" required placeholder="e.g. IKKO DIGITAL" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
-                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">This name is displayed inside the user's UPI app (GPay/PhonePe) when scanning.</p>
+                            <label for="setting-merchant-name" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">Business / Account Name</label>
+                            <input type="text" id="setting-merchant-name" placeholder="e.g. IKKO DIGITAL" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
                         </div>
 
-                        <div style="margin-bottom: 25px;">
-                            <label for="setting-upi-key" style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">UPI Gateway API Key</label>
-                            <input type="text" id="setting-upi-key" placeholder="Enter upigateway.com key (Leave empty or set 'test' for Sandbox)" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
-                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Used for real-time automated payment redirections. Get your key from upigateway.com.</p>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" style="padding: 10px 25px; font-size: 0.95rem; font-weight: 700;">Save Settings</button>
+                        <button type="submit" class="btn btn-primary" style="padding: 10px 25px; font-size: 0.95rem; font-weight: 700; margin-top: 15px;">Save Settings</button>
                     </form>
                 </div>
             </div>
@@ -339,24 +362,42 @@
 
         function renderSettings() {
             const settings = getSettings();
-            document.getElementById('setting-upi-enabled').checked = settings.upiEnabled;
+            
+            // SabPaisa Configurations
+            document.getElementById('setting-sabpaisa-enabled').checked = !!settings.sabpaisaEnabled;
+            document.getElementById('setting-sabpaisa-clientcode').value = settings.sabpaisaClientCode || '';
+            document.getElementById('setting-sabpaisa-apikey').value = settings.sabpaisaApiKey || '';
+            document.getElementById('setting-sabpaisa-secretkey').value = settings.sabpaisaSecretKey || '';
+            document.getElementById('setting-sabpaisa-mode').value = settings.sabpaisaMode || 'live';
+
+            // Fallback UPI configurations
+            document.getElementById('setting-upi-enabled').checked = !!settings.upiEnabled;
             document.getElementById('setting-upi-id').value = settings.upiId || '';
             document.getElementById('setting-merchant-name').value = settings.merchantName || '';
-            document.getElementById('setting-upi-key').value = settings.upiApiKey || '';
         }
 
         function handleSaveSettings(e) {
             e.preventDefault();
+            
+            const sabpaisaEnabled = document.getElementById('setting-sabpaisa-enabled').checked;
+            const sabpaisaClientCode = document.getElementById('setting-sabpaisa-clientcode').value.trim();
+            const sabpaisaApiKey = document.getElementById('setting-sabpaisa-apikey').value.trim();
+            const sabpaisaSecretKey = document.getElementById('setting-sabpaisa-secretkey').value.trim();
+            const sabpaisaMode = document.getElementById('setting-sabpaisa-mode').value;
+
             const upiEnabled = document.getElementById('setting-upi-enabled').checked;
             const upiId = document.getElementById('setting-upi-id').value.trim();
             const merchantName = document.getElementById('setting-merchant-name').value.trim();
-            const upiApiKey = document.getElementById('setting-upi-key').value.trim();
 
             saveSettings({
+                sabpaisaEnabled,
+                sabpaisaClientCode,
+                sabpaisaApiKey,
+                sabpaisaSecretKey,
+                sabpaisaMode,
                 upiEnabled,
                 upiId,
-                merchantName,
-                upiApiKey
+                merchantName
             });
 
             alert('Settings saved successfully!');
