@@ -52,6 +52,13 @@
                             <span class="payment-option-desc">Pay cash at your doorstep when products are delivered.</span>
                         </div>
                     </div>
+                    <div class="payment-option" id="pay-upi" onclick="selectPayment('upi')" style="display: none;">
+                        <input type="radio" name="payment_method" id="rad-upi">
+                        <div class="payment-option-label">
+                            <span class="payment-option-title">Direct UPI QR Code Payment</span>
+                            <span class="payment-option-desc">Scan the dynamic QR code with GPay/PhonePe and pay directly.</span>
+                        </div>
+                    </div>
                     <div class="payment-option" id="pay-online" onclick="selectPayment('online')">
                         <input type="radio" name="payment_method" id="rad-online">
                         <div class="payment-option-label">
@@ -61,7 +68,24 @@
                     </div>
                 </div>
 
-                <button type="submit" class="place-order-btn">Place Order (Cash On Delivery)</button>
+                <!-- Dynamic UPI Payment Card -->
+                <div id="upi-payment-panel" style="display: none; margin-top: 25px; border: 1.5px solid var(--accent); border-radius: 8px; padding: 20px; background-color: #f7fafc; text-align: center;">
+                    <h3 style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--primary); margin-bottom: 15px;">Scan QR Code to Pay</h3>
+                    <div id="upi-qr-container" style="background-color: white; padding: 15px; border-radius: 6px; display: inline-block; box-shadow: var(--shadow-sm); margin-bottom: 15px;">
+                        <img id="upi-qr-image" src="" alt="UPI Payment QR Code" style="width: 200px; height: 200px; display: block;">
+                    </div>
+                    <p style="font-size: 0.9rem; color: #4a5568; line-height: 1.5; margin-bottom: 20px; max-width: 450px; margin-left: auto; margin-right: auto;">
+                        Scan the code above with GPay, PhonePe, BHIM, or Paytm to pay <strong id="upi-pay-amount-label" style="color: var(--accent); font-size: 1.05rem;">Rs. 0.00</strong>.
+                    </p>
+                    
+                    <div class="form-group" style="max-width: 320px; margin: 0 auto; text-align: left;">
+                        <label for="cust-utr" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; color: var(--primary);">12-Digit UPI UTR / Transaction Ref No *</label>
+                        <input type="text" id="cust-utr" placeholder="Enter 12-digit UTR code" pattern="[0-9]{12}" maxlength="12" title="Please enter a valid 12-digit transaction UTR number" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; font-family: monospace; letter-spacing: 1px; box-sizing: border-box;">
+                        <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 5px;">Enter the 12-digit UPI transaction reference number from your app receipt for order approval.</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="place-order-btn" style="margin-top: 25px;">Place Order (Cash On Delivery)</button>
             </form>
         </div>
 
@@ -118,16 +142,51 @@
             document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
             document.getElementById('rad-cod').checked = (method === 'cod');
             document.getElementById('rad-online').checked = (method === 'online');
+            if (document.getElementById('rad-upi')) {
+                document.getElementById('rad-upi').checked = (method === 'upi');
+            }
             
             const btn = document.querySelector('.place-order-btn');
+            const upiPanel = document.getElementById('upi-payment-panel');
+            const utrInput = document.getElementById('cust-utr');
             
             if (method === 'cod') {
                 document.getElementById('pay-cod').classList.add('active');
                 btn.innerText = 'Place Order (Cash On Delivery)';
-            } else {
+                upiPanel.style.display = 'none';
+                utrInput.required = false;
+            } else if (method === 'online') {
                 document.getElementById('pay-online').classList.add('active');
                 btn.innerText = 'Pay & Place Order Online';
+                upiPanel.style.display = 'none';
+                utrInput.required = false;
+            } else if (method === 'upi') {
+                document.getElementById('pay-upi').classList.add('active');
+                btn.innerText = 'Verify & Confirm Order';
+                upiPanel.style.display = 'block';
+                utrInput.required = true;
+                generateUpiQR();
             }
+        }
+
+        function generateUpiQR() {
+            const settings = getSettings();
+            const total = getCartTotal();
+            
+            const orderNum = Math.floor(100000 + Math.random() * 900000);
+            const mockOrderId = `IKKO-${orderNum}`;
+            
+            // pa: merchant UPI ID, pn: Merchant business name, am: amount, cu: currency, tn: notes (Order ID)
+            const upiUrl = `upi://pay?pa=${settings.upiId}&pn=${encodeURIComponent(settings.merchantName)}&am=${total.toFixed(2)}&cu=INR&tn=Order-${mockOrderId}`;
+            
+            // Load QR code via QRServer API
+            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(upiUrl)}`;
+            
+            document.getElementById('upi-qr-image').src = qrImageUrl;
+            document.getElementById('upi-pay-amount-label').innerText = formatPrice(total);
+            
+            // Save mock order ID so it matches the final order
+            window.activeCheckoutOrderId = mockOrderId;
         }
 
         function renderCheckoutSummary() {
@@ -136,7 +195,6 @@
 
             const cart = getCart();
             if (cart.length === 0) {
-                // If cart is empty, redirect to index
                 alert('Your cart is empty. Please add products to cart before checkout.');
                 window.location.href = 'index.html';
                 return;
@@ -171,15 +229,32 @@
             const cart = getCart();
             const total = getCartTotal();
 
-            // Create a randomized order ID
-            const orderNum = Math.floor(100000 + Math.random() * 900000);
-            const orderId = `IKKO-${orderNum}`;
+            let orderId = '';
+            let utr = '';
+
+            if (selectedPaymentMethod === 'upi') {
+                if (window.activeCheckoutOrderId) {
+                    orderId = window.activeCheckoutOrderId;
+                } else {
+                    const orderNum = Math.floor(100000 + Math.random() * 900000);
+                    orderId = `IKKO-${orderNum}`;
+                }
+                utr = document.getElementById('cust-utr').value.trim();
+                if (!utr || utr.length !== 12) {
+                    alert('Please enter a valid 12-digit transaction UTR reference number.');
+                    return;
+                }
+            } else {
+                const orderNum = Math.floor(100000 + Math.random() * 900000);
+                orderId = `IKKO-${orderNum}`;
+            }
 
             const order = {
                 id: orderId,
                 date: new Date().toISOString(),
                 status: 'pending',
                 paymentMethod: selectedPaymentMethod,
+                utr: utr,
                 customer: {
                     name,
                     phone,
@@ -204,6 +279,12 @@
 
         window.addEventListener('load', () => {
             renderCheckoutSummary();
+            
+            // Check settings and display UPI option
+            const settings = getSettings();
+            if (settings && settings.upiEnabled) {
+                document.getElementById('pay-upi').style.display = 'flex';
+            }
         });
     </script>
 </body>

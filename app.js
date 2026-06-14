@@ -400,6 +400,23 @@ function dbInit() {
     if (!localStorage.getItem('ikko_orders')) {
         localStorage.setItem('ikko_orders', JSON.stringify([]));
     }
+    if (!localStorage.getItem('ikko_settings')) {
+        localStorage.setItem('ikko_settings', JSON.stringify({
+            upiEnabled: true,
+            upiId: 'test@upi',
+            merchantName: 'IKKO DIGITAL'
+        }));
+    }
+}
+
+// Settings Helpers
+function getSettings() {
+    dbInit();
+    return JSON.parse(localStorage.getItem('ikko_settings'));
+}
+
+function saveSettings(settings) {
+    localStorage.setItem('ikko_settings', JSON.stringify(settings));
 }
 
 // Product Database Helpers

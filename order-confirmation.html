@@ -239,7 +239,14 @@
             `).join('');
 
             const formattedSubtotal = formatPrice(order.total);
-            const paymentText = order.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'Online Payment (UPI/Card)';
+            let paymentText = '';
+            if (order.paymentMethod === 'cod') {
+                paymentText = 'Cash on Delivery (COD)';
+            } else if (order.paymentMethod === 'upi') {
+                paymentText = `UPI QR Payment (UTR: ${order.utr || 'Pending'})`;
+            } else {
+                paymentText = 'Online Payment';
+            }
 
             card.innerHTML = `
                 <div class="confirmation-success-header">
@@ -265,7 +272,7 @@
                         <h3>Billing & Payment</h3>
                         <p>
                             <strong>Method:</strong> ${paymentText}<br>
-                            <strong>Status:</strong> Awaiting Delivery<br>
+                            <strong>Status:</strong> ${order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery'}<br>
                             <strong>Expected Delivery:</strong> 3-5 Business Days
                         </p>
                     </div>
