@@ -775,6 +775,9 @@ function updateCartUI() {
     const badge = document.getElementById('cart-badge-count');
     if (badge) {
         badge.innerText = getCartCount();
+        badge.classList.remove('cart-bounce-anim');
+        void badge.offsetWidth; // Trigger reflow to restart animation
+        badge.classList.add('cart-bounce-anim');
     }
 }
 
