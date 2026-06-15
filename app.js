@@ -550,17 +550,6 @@ function renderHeader() {
         <div class="announcement-bar">
             <div class="announcement-bar__text">Up to 90% Off Select Tablets & Smart Phone | Free Shipping All Over India |</div>
         </div>
-        <div class="sub-header-nav">
-            <div class="sub-header-container">
-                <a href="index.html">Search</a>
-                <a href="privacy-policy.html">Privacy Policy</a>
-                <a href="terms-of-service.html">Terms of Service</a>
-                <a href="shipping-policy.html">Shipping Policy</a>
-                <a href="refund-policy.html">Refund Policy</a>
-                <a href="about-us.html">About Us</a>
-                <a href="contact-information.html">Contact Us</a>
-            </div>
-        </div>
         <header class="main-header">
             <div class="header-container">
                 <a href="index.html" class="logo-link">IKKO DIGITAL</a>
@@ -576,10 +565,6 @@ function renderHeader() {
                 </div>
                 
                 <div class="header-actions">
-                    <a href="admin.html" class="header-action-btn admin-portal-link" title="Admin Panel">
-                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span class="action-btn-text">Login</span>
-                    </a>
                     <button class="header-action-btn cart-toggle-btn" onclick="openCartDrawer()" title="View Cart">
                         <div class="cart-icon-wrapper">
                             <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
@@ -596,6 +581,7 @@ function renderHeader() {
                 <a href="collections.html?type=all" class="nav-item">SHOP ALL</a>
                 <a href="collections.html?type=tablets" class="nav-item">TABLETS</a>
                 <a href="collections.html?type=smart-phone" class="nav-item">SMART PHONE</a>
+                <a href="admin.html" class="nav-item">LOGIN</a>
             </div>
         </nav>
     `;
@@ -753,7 +739,7 @@ function renderCartDrawer() {
                         <span>Subtotal:</span>
                         <span class="subtotal-amount">${formatPrice(total)}</span>
                     </div>
-                    <p class="shipping-info-text">🚚 Free Shipping & Cash On Delivery Available</p>
+                    <p class="shipping-info-text">🚚 Free Shipping 5 - 7 Days</p>
                     <a href="checkout.html" class="checkout-btn">Proceed to Checkout</a>
                 </div>
             ` : ''}

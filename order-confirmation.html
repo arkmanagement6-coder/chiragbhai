@@ -279,7 +279,7 @@
             if (order.paymentMethod === 'cod') {
                 paymentText = 'Cash on Delivery (COD)';
             } else if (order.paymentMethod === 'upi') {
-                const providerLabel = order.upiProvider ? (order.upiProvider === 'phonepe' ? 'PhonePe' : (order.upiProvider === 'paytm' ? 'Paytm' : 'SCAN PAY')) : 'UPI QR';
+                const providerLabel = order.upiProvider ? (order.upiProvider === 'phonepe' ? 'PhonePe' : (order.upiProvider === 'paytm' ? 'Paytm' : (order.upiProvider === 'gpay' ? 'Google Pay' : 'SCAN PAY'))) : 'UPI QR';
                 if (order.utr === 'Real-Time Verified') {
                     paymentText = `${providerLabel} (Real-Time Confirmed)`;
                 } else if (order.utr === 'Auto-Verified') {

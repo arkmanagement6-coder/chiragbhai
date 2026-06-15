@@ -104,7 +104,7 @@ button, input, select, textarea {
 }
 .logo-link {
     font-family: var(--font-heading);
-    font-size: 1.6rem;
+    font-size: 1.45rem;
     font-weight: 800;
     letter-spacing: 0.5px;
     color: #1c1d1d;
@@ -1679,16 +1679,49 @@ button, input, select, textarea {
 }
 
 @media (max-width: 768px) {
+    .announcement-bar {
+        font-size: 0.7rem;
+        padding: 8px 10px;
+        letter-spacing: 0.2px;
+    }
+    .announcement-bar__text {
+        font-size: 0.7rem;
+    }
     .header-container {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        row-gap: 12px;
+        column-gap: 15px;
+        padding: 12px 15px;
     }
     .logo-link {
-        text-align: center;
+        grid-column: 1;
+        font-size: 1.25rem;
+        text-align: left;
     }
     .header-actions {
+        grid-column: 2;
+        justify-content: flex-end;
+        margin: 0;
+        padding: 0;
+        gap: 10px;
+    }
+    .search-bar-container {
+        grid-column: 1 / span 2;
+        width: 100%;
+        max-width: 100%;
+    }
+    .lower-nav-container {
+        display: flex;
+        flex-wrap: wrap;
         justify-content: center;
+        gap: 6px 15px;
+        padding: 8px 15px;
+    }
+    .nav-item {
+        font-size: 0.8rem;
+        padding: 8px 0;
     }
     .hero-banner h1 {
         font-size: 2.2rem;
