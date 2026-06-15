@@ -1761,6 +1761,10 @@ button, input, select, textarea {
     .form-group.full-width {
         grid-column: span 1;
     }
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 35px;
+    }
 }
 
 @media (max-width: 480px) {
