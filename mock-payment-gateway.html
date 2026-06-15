@@ -328,7 +328,7 @@
                 <text x="52" y="45" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="600" font-size="9" fill="#718096" letter-spacing="0.2">Sabse Behetar Payment Solution</text>
             </svg>
             
-            <div class="scan-title">Scan & Pay</div>
+            <div class="scan-title">UPI Payment</div>
             
             <!-- Timer -->
             <div class="timer-badge">
@@ -336,13 +336,13 @@
             </div>
         </div>
         
-        <!-- Desktop QR Mode -->
-        <div class="qr-frame">
+        <!-- Desktop QR Mode (Hidden until real credentials are provided) -->
+        <div class="qr-frame" style="display: none;">
             <img id="qr-code-img" src="" alt="Payment QR Code">
         </div>
         
-        <!-- NPCI Logos -->
-        <div class="npci-row">
+        <!-- NPCI Logos (Hidden until real credentials are provided) -->
+        <div class="npci-row" style="display: none;">
             <svg viewBox="0 0 100 30" width="45" height="15" opacity="0.8">
                 <!-- NPCI custom mockup -->
                 <text x="0" y="20" font-family="sans-serif" font-weight="900" font-size="16" fill="#002970">NPCI</text>
@@ -353,7 +353,7 @@
             </svg>
         </div>
         
-        <div class="powered-by">Powered by <strong>SabQR</strong></div>
+        <div class="powered-by" style="display: none;">Powered by <strong>SabQR</strong></div>
         
         <!-- Apps logos strip -->
         <div class="apps-strip">
@@ -381,7 +381,7 @@
         <!-- Business Info -->
         <div class="business-details">
             <div class="business-name" id="merchant-name-label">JARVIS AI</div>
-            <div class="upi-id-label" id="upi-id-label">sabpaisa.lucky06@hdfcbank</div>
+            <div class="upi-id-label" id="upi-id-label" style="display: none;">sabpaisa.lucky06@hdfcbank</div>
             <p style="font-size: 0.75rem; color: var(--text-muted); margin: 6px 0 15px 0;" id="order-id-label">Order ID: IKKO-XXXXXX</p>
         </div>
 
@@ -393,6 +393,9 @@
                 <button class="mobile-btn phonepe" style="padding: 10px 5px; font-size: 0.75rem;" onclick="launchUPIApp('phonepe')">PhonePe</button>
                 <button class="mobile-btn paytm" style="padding: 10px 5px; font-size: 0.75rem;" onclick="launchUPIApp('paytm')">Paytm</button>
             </div>
+            <p id="desktop-notice" style="font-size: 0.75rem; color: #ef4444; margin-top: 10px; display: none; font-weight: 500; line-height: 1.4;">
+                ⚠️ App redirect works best on mobile. If on desktop, please checkout using a mobile browser.
+            </p>
         </div>
 
         <!-- Order amount header details -->
@@ -452,6 +455,10 @@
                     launchUPIApp(selectedMethod);
                 }, 400);
             }
+        } else {
+            // Show payment options for desktop too since QR is hidden
+            document.getElementById('mobile-redirect-container').style.display = 'block';
+            document.getElementById('desktop-notice').style.display = 'block';
         }
 
         // Deep link redirection logic
