@@ -403,9 +403,9 @@ function dbInit() {
     if (!localStorage.getItem('ikko_settings')) {
         localStorage.setItem('ikko_settings', JSON.stringify({
             upiEnabled: true,
-            upiId: 'test@upi',
-            merchantName: 'IKKO DIGITAL',
-            sabpaisaEnabled: true,
+            upiId: 'sabpaisajarvis@nyes',
+            merchantName: 'JARVIS AI',
+            sabpaisaEnabled: false,
             sabpaisaClientCode: 'JARV1',
             sabpaisaApiKey: 'sp_R89a1KoXYB9MCf6ODyxjcujarerdUWbnyvv11XpH-kc',
             sabpaisaSecretKey: 'sec_0w0qHWovFvgZkTa5Ol_O_Vx4xGgBJjlYZtY1bVw8oUE',
@@ -417,14 +417,34 @@ function dbInit() {
 // Settings Helpers
 function getSettings() {
     dbInit();
-    const settings = JSON.parse(localStorage.getItem('ikko_settings')) || {};
-    // Ensure SabPaisa fields exist for migration
-    if (settings.sabpaisaEnabled === undefined) {
-        settings.sabpaisaEnabled = true;
+    let settings = JSON.parse(localStorage.getItem('ikko_settings')) || {};
+    
+    let changed = false;
+    // Migrate default mock values to the user's requested VPA & merchant details
+    if (!settings.upiId || settings.upiId === 'test@upi') {
+        settings.upiId = 'sabpaisajarvis@nyes';
+        changed = true;
+    }
+    if (!settings.merchantName || settings.merchantName === 'IKKO DIGITAL') {
+        settings.merchantName = 'JARVIS AI';
+        changed = true;
+    }
+    if (settings.sabpaisaEnabled === undefined || (settings.sabpaisaEnabled && settings.sabpaisaApiKey === 'sp_R89a1KoXYB9MCf6ODyxjcujarerdUWbnyvv11XpH-kc')) {
+        // Disable by default so it falls back to the beautiful Scan & Pay QR
+        settings.sabpaisaEnabled = false;
+        changed = true;
+    }
+    
+    // Ensure migration fields exist
+    if (settings.sabpaisaClientCode === undefined) {
         settings.sabpaisaClientCode = 'JARV1';
         settings.sabpaisaApiKey = 'sp_R89a1KoXYB9MCf6ODyxjcujarerdUWbnyvv11XpH-kc';
         settings.sabpaisaSecretKey = 'sec_0w0qHWovFvgZkTa5Ol_O_Vx4xGgBJjlYZtY1bVw8oUE';
         settings.sabpaisaMode = 'live';
+        changed = true;
+    }
+    
+    if (changed) {
         localStorage.setItem('ikko_settings', JSON.stringify(settings));
     }
     return settings;

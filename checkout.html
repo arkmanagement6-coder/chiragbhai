@@ -463,7 +463,9 @@
                     // Sandbox mode - Redirect to local mock gateway
                     setTimeout(() => {
                         clearCart();
-                        window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(settings.merchantName || 'IKKO DIGITAL')}`;
+                        const upiId = settings.upiId || 'sabpaisajarvis@nyes';
+                        const merchant = settings.merchantName || 'JARVIS AI';
+                        window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}`;
                     }, 1000);
                     return;
                 }
@@ -553,7 +555,9 @@
                 // Test sandbox mode - Redirect to local mock gateway
                 setTimeout(() => {
                     clearCart();
-                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(settings.merchantName || 'IKKO DIGITAL')}`;
+                    const upiId = settings.upiId || 'sabpaisajarvis@nyes';
+                    const merchant = settings.merchantName || 'JARVIS AI';
+                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}`;
                 }, 1000);
             }
         }
