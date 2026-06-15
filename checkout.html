@@ -550,6 +550,9 @@
         window.addEventListener('load', () => {
             showWizardStep(1);
             
+            // Render the checkout summary on load so the "Order Items" block is populated on Step 1
+            renderCheckoutSummary();
+            
             // Auto-fill customer info if logged in
             try {
                 const customer = JSON.parse(localStorage.getItem('ikko_customer'));
