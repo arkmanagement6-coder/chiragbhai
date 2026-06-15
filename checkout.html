@@ -203,10 +203,14 @@
                             <span class="price-row-label">Delivery Charges</span>
                             <span class="price-row-value text-green">FREE</span>
                         </div>
-                        <div class="price-row total-row" style="margin-top: 12px; padding-top: 12px; border-top: 1.5px dashed var(--border-color);">
+                        <div class="price-row total-row" style="margin-top: 12px; padding-top: 12px; border-top: 1.5px dashed var(--border-color); margin-bottom: 20px;">
                             <span class="price-row-label">Total Amount</span>
                             <span class="price-row-value" id="price-final-total" style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">Rs. 0.00</span>
                         </div>
+                    </div>
+                    <!-- Desktop checkout action button inside the card -->
+                    <div class="desktop-checkout-action-wrap">
+                        <button class="btn-primary-action-orange" onclick="handleOrangeOrderNowClick()">Order Now</button>
                     </div>
                 </div>
 
@@ -271,7 +275,7 @@
             if (step === 1) {
                 addressSec.style.display = 'block';
                 paymentSec.style.display = 'none';
-                stickyBar.style.display = 'none';
+                stickyBar.classList.remove('active-step2');
                 
                 indAddress.classList.add('active');
                 indAddress.classList.remove('completed');
@@ -280,7 +284,7 @@
             } else if (step === 2) {
                 addressSec.style.display = 'none';
                 paymentSec.style.display = 'block';
-                stickyBar.style.display = 'flex'; // Show sticky bar on step 2
+                stickyBar.classList.add('active-step2');
                 
                 indAddress.classList.remove('active');
                 indAddress.classList.add('completed');
