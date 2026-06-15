@@ -672,7 +672,7 @@ function renderFooter() {
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 IKKO DIGITAL. All rights reserved. Created for demonstration purposes.</p>
+                <p>&copy; 2026 IKKO DIGITAL. All rights reserved.</p>
             </div>
         </footer>
     `;
