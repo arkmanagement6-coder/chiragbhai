@@ -104,7 +104,7 @@
                     <div class="payment-method-options-list">
                         
                         <!-- PhonePe Option -->
-                        <div class="payment-app-row-card" id="card-phonepe" onclick="selectPaymentMethod('phonepe')">
+                        <div class="payment-app-row-card" id="card-phonepe" onclick="selectPaymentMethod('phonepe', true)">
                             <div class="app-info-left">
                                 <div class="app-logo purple-bg">
                                     <svg viewBox="0 0 40 40" width="36" height="36">
@@ -124,7 +124,7 @@
                         </div>
 
                         <!-- Google Pay (GPay) Option -->
-                        <div class="payment-app-row-card" id="card-gpay" onclick="selectPaymentMethod('gpay')">
+                        <div class="payment-app-row-card" id="card-gpay" onclick="selectPaymentMethod('gpay', true)">
                             <div class="app-info-left">
                                 <div class="app-logo white-bg" style="display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px;">
                                     <svg viewBox="0 0 40 16" width="45" height="18">
@@ -143,7 +143,7 @@
                         </div>
 
                         <!-- Paytm Option -->
-                        <div class="payment-app-row-card" id="card-paytm" onclick="selectPaymentMethod('paytm')">
+                        <div class="payment-app-row-card" id="card-paytm" onclick="selectPaymentMethod('paytm', true)">
                             <div class="app-info-left">
                                 <div class="app-logo lightblue-bg">
                                     <svg viewBox="0 0 60 25" width="45" height="18" style="margin-top: 2px;">
@@ -162,7 +162,7 @@
                         </div>
 
                         <!-- SCAN PAY Option -->
-                        <div class="payment-app-row-card" id="card-scanpay" onclick="selectPaymentMethod('scanpay')">
+                        <div class="payment-app-row-card" id="card-scanpay" onclick="selectPaymentMethod('scanpay', true)">
                             <div class="app-info-left">
                                 <div class="app-logo orange-border">
                                     <svg viewBox="0 0 40 40" width="28" height="28" stroke="#ff8c00" stroke-width="2.5" fill="none">
@@ -330,7 +330,7 @@
         }
 
         // Selection of PhonePe, Paytm, SCAN PAY
-        function selectPaymentMethod(method) {
+        function selectPaymentMethod(method, autoRedirect = false) {
             selectedPaymentMethod = method;
             
             // Toggle active card styles
@@ -344,6 +344,13 @@
             
             const selectedCard = document.getElementById(cardId);
             if (selectedCard) selectedCard.classList.add('active');
+            
+            // Immediately initiate payment redirection if explicitly clicked by user
+            if (autoRedirect) {
+                setTimeout(() => {
+                    handleOrangeOrderNowClick();
+                }, 250);
+            }
         }
 
         // Calculate and render original price, discount, and total
