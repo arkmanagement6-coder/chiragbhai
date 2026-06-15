@@ -969,6 +969,113 @@ button, input, select, textarea {
 .pdp-description p {
     margin-bottom: 15px;
 }
+
+/* --- Rich Product Details Page Description Styles --- */
+.rich-pdp-description {
+    font-family: var(--font-body);
+    color: var(--text-main);
+    line-height: 1.7;
+    margin-top: 15px;
+}
+.pdp-intro-para {
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+    color: #475569;
+}
+.pdp-features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+.pdp-feature-card {
+    background-color: #f8fafc;
+    border: 1px solid rgba(0,0,0,0.03);
+    border-radius: 8px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pdp-feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+.pdp-feature-card .feat-icon {
+    font-size: 1.4rem;
+}
+.pdp-feature-card .feat-text {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+.pdp-desc-section {
+    margin-bottom: 25px;
+}
+.pdp-desc-section h4 {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding-bottom: 6px;
+}
+.pdp-highlights-list {
+    list-style: none;
+    padding: 0;
+}
+.pdp-highlights-list li {
+    font-size: 0.92rem;
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 10px;
+    color: #475569;
+}
+.pdp-highlights-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 1.2rem;
+    top: -2px;
+}
+.pdp-box-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 20px;
+}
+.pdp-box-list li {
+    font-size: 0.9rem;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.pdp-box-list .check-bullet {
+    color: var(--accent-green);
+    font-weight: bold;
+}
+@media (max-width: 480px) {
+    .pdp-features-grid {
+        grid-template-columns: 1fr;
+    }
+    .pdp-box-list {
+        grid-template-columns: 1fr;
+    }
+}
 .pdp-actions-card {
     background-color: var(--bg-main);
     padding: 20px;

@@ -137,19 +137,86 @@
 
             // Build custom description
             let descriptionHtml = '';
-            if (selectedProduct.description) {
-                descriptionHtml = selectedProduct.description
-                    .split('\n')
-                    .map(p => p.trim())
-                    .filter(p => p.length > 0)
-                    .map(p => `<p>${p}</p>`)
-                    .join('');
+            
+            // Determine category details based on product title
+            const titleLower = selectedProduct.title.toLowerCase();
+            const isTablet = titleLower.includes('ipad') || titleLower.includes('tablet') || titleLower.includes('tab');
+            const isAudio = titleLower.includes('airdopes') || titleLower.includes('earbuds') || titleLower.includes('audio') || titleLower.includes('tws') || titleLower.includes('ufo');
+            
+            let highlights = [];
+            let inTheBox = [];
+            let detailParagraph = selectedProduct.description || '';
+            
+            if (isTablet) {
+                highlights = [
+                    "🚀 <strong>Next-Gen Performance:</strong> Powered by premium chips (M-series / Bionic / Snapdragon) for effortless multitasking, gaming, and creative tasks.",
+                    "🎬 <strong>Cinematic Visual Display:</strong> High-resolution Liquid Retina / AMOLED display with anti-reflective coating and vibrant color accuracy.",
+                    "📸 <strong>Pro Camera Setup:</strong> Features advanced front and back cameras optimized for high-quality video calls, document scanning, and recording.",
+                    "🔋 <strong>All-Day Battery Life:</strong> Highly efficient hardware-software integration delivers up to 10+ hours of continuous usage on a single charge."
+                ];
+                inTheBox = ["Tablet Device", "USB-C Charging Cable", "Fast Charging Adapter", "User Manual & Quick Start Guide"];
+                if (!detailParagraph) {
+                    detailParagraph = `Elevate your digital lifestyle with the genuine ${selectedProduct.title}. Combining cutting-edge processing power with an ultra-vivid display, this tablet is the ultimate tool for both creative professionals and entertainment enthusiasts. Enjoy a seamless experience whether drawing, streaming movies, or editing files on the go.`;
+                }
+            } else if (isAudio) {
+                highlights = [
+                    "🎵 <strong>Immersive Soundscape:</strong> Precision-tuned acoustic drivers deliver deep bass, clear mids, and sparkling highs.",
+                    "📞 <strong>Crystal-Clear Calls:</strong> Advanced environmental noise cancellation isolates your voice from background noise.",
+                    "⚡ <strong>ASAP™ Fast Charge:</strong> Pocket-sized charging case provides hours of playback from just a quick 10-minute charge.",
+                    "💧 <strong>Sweat & Splash Proof:</strong> IPX-rated water resistance protects against rain, sweat, and splashes during intense workouts."
+                ];
+                inTheBox = ["Wireless Earbuds (L & R)", "Pocket Charging Case", "Multiple Silicone Ear Tips (S/M/L)", "Type-C Charging Cable"];
+                if (!detailParagraph) {
+                    detailParagraph = `Immerse yourself in pure auditory bliss with the ${selectedProduct.title}. Featuring advanced Bluetooth connectivity, ergonomic fit, and deep bass delivery, these earbuds are designed to accompany you through long calls, rigorous workouts, and everyday commutes with absolute ease.`;
+                }
             } else {
-                descriptionHtml = `
-                    <p>Experience peak performance with the genuine ${selectedProduct.title}. Fully verified and backed by brand warranty. Free express delivery all over the country.</p>
-                    <p>Enjoy secure online payments, free shipping in 5 - 7 days, and easy returns if not completely satisfied.</p>
-                `;
+                // Smartphone or default
+                highlights = [
+                    "🚀 <strong>Smart Processor:</strong> Blazing-fast performance with intelligent AI computing for smooth gaming and app usage.",
+                    "📱 <strong>Ergonomic Compact Design:</strong> A high-density screen fitted into a sleek, pocket-friendly form factor that feels premium in hand.",
+                    "🔋 <strong>Optimized Power Management:</strong> High-capacity battery combined with battery saver modes for all-day reliability.",
+                    "🛡️ <strong>Secure Authentication:</strong> Fast and reliable biometric security for secure login and data privacy."
+                ];
+                inTheBox = ["Smartphone Device", "Sleek Protective Case", "Type-C Charge Cable", "Sim Ejector Tool", "Quick Setup Guide"];
+                if (!detailParagraph) {
+                    detailParagraph = `Experience the future of pocket computing with the ${selectedProduct.title}. A perfect balance of compact aesthetics and powerful hardware, this device is engineered to provide premium phone capabilities, high-speed connectivity, and an elegant interface for your daily productivity.`;
+                }
             }
+
+            descriptionHtml = `
+                <div class="rich-pdp-description">
+                    <p class="pdp-intro-para">${detailParagraph}</p>
+                    
+                    <div class="pdp-features-grid">
+                        <div class="pdp-feature-card">
+                            <span class="feat-icon">🚚</span>
+                            <span class="feat-text">Free Shipping</span>
+                        </div>
+                        <div class="pdp-feature-card">
+                            <span class="feat-icon">🛡️</span>
+                            <span class="feat-text">Brand Warranty</span>
+                        </div>
+                        <div class="pdp-feature-card">
+                            <span class="feat-icon">🔄</span>
+                            <span class="feat-text">Easy Returns</span>
+                        </div>
+                    </div>
+
+                    <div class="pdp-desc-section">
+                        <h4>🔑 Product Highlights</h4>
+                        <ul class="pdp-highlights-list">
+                            ${highlights.map(h => `<li>${h}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="pdp-desc-section">
+                        <h4>📦 What's in the Box</h4>
+                        <ul class="pdp-box-list">
+                            ${inTheBox.map(item => `<li><span class="check-bullet">✓</span> ${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
 
             container.innerHTML = `
                 <!-- Left Image Gallery Column -->
