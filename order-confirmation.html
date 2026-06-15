@@ -207,6 +207,16 @@
             }
 
             if (!orderId) {
+                // Fallback to the latest order placed on this browser if no ID is passed in the URL redirect
+                const orders = getOrders();
+                if (orders.length > 0) {
+                    orderId = orders[orders.length - 1].id;
+                    // Treat static redirect from payment gateway as successful confirmation
+                    status = 'success'; 
+                }
+            }
+
+            if (!orderId) {
                 card.innerHTML = `
                     <div style="text-align: center; padding: 40px 0;">
                         <h2 style="color: var(--accent); font-family: var(--font-heading);">No Order Information Found</h2>
