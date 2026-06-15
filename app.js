@@ -403,7 +403,7 @@ function dbInit() {
     if (!localStorage.getItem('ikko_settings')) {
         localStorage.setItem('ikko_settings', JSON.stringify({
             upiEnabled: true,
-            upiId: 'sabpaisajarvis@nyes',
+            upiId: 'sabpaisa.lucky06@hdfcbank',
             merchantName: 'JARVIS AI',
             sabpaisaEnabled: false,
             sabpaisaClientCode: 'JARV1',
@@ -421,8 +421,8 @@ function getSettings() {
     
     let changed = false;
     // Migrate default mock values to the user's requested VPA & merchant details
-    if (!settings.upiId || settings.upiId === 'test@upi') {
-        settings.upiId = 'sabpaisajarvis@nyes';
+    if (!settings.upiId || settings.upiId === 'test@upi' || settings.upiId === 'sabpaisajarvis@nyes') {
+        settings.upiId = 'sabpaisa.lucky06@hdfcbank';
         changed = true;
     }
     if (!settings.merchantName || settings.merchantName === 'IKKO DIGITAL') {

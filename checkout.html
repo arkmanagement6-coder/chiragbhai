@@ -463,7 +463,7 @@
                     // Sandbox mode - Redirect to local mock gateway
                     setTimeout(() => {
                         clearCart();
-                        const upiId = settings.upiId || 'sabpaisajarvis@nyes';
+                        const upiId = settings.upiId || 'sabpaisa.lucky06@hdfcbank';
                         const merchant = settings.merchantName || 'JARVIS AI';
                         window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}`;
                     }, 1000);
@@ -555,7 +555,7 @@
                 // Test sandbox mode - Redirect to local mock gateway
                 setTimeout(() => {
                     clearCart();
-                    const upiId = settings.upiId || 'sabpaisajarvis@nyes';
+                    const upiId = settings.upiId || 'sabpaisa.lucky06@hdfcbank';
                     const merchant = settings.merchantName || 'JARVIS AI';
                     window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}`;
                 }, 1000);

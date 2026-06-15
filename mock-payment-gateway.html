@@ -381,7 +381,7 @@
         <!-- Business Info -->
         <div class="business-details">
             <div class="business-name" id="merchant-name-label">JARVIS AI</div>
-            <div class="upi-id-label" id="upi-id-label">sabpaisajarvis@nyes</div>
+            <div class="upi-id-label" id="upi-id-label">sabpaisa.lucky06@hdfcbank</div>
             <p style="font-size: 0.75rem; color: var(--text-muted); margin: 6px 0 15px 0;" id="order-id-label">Order ID: IKKO-XXXXXX</p>
         </div>
 
@@ -426,7 +426,7 @@
         const orderId = urlParams.get('client_txn_id');
         const amount = urlParams.get('amount') || '0.00';
         const merchant = urlParams.get('merchant') || 'JARVIS AI';
-        const upiId = urlParams.get('upi_id') || 'sabpaisajarvis@nyes';
+        const upiId = urlParams.get('upi_id') || 'sabpaisa.lucky06@hdfcbank';
         const selectedMethod = urlParams.get('method') || 'scanpay';
         
         document.getElementById('amount-label').innerText = 'Rs. ' + parseFloat(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
