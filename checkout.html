@@ -549,6 +549,21 @@
 
         window.addEventListener('load', () => {
             showWizardStep(1);
+            
+            // Auto-fill customer info if logged in
+            try {
+                const customer = JSON.parse(localStorage.getItem('ikko_customer'));
+                if (customer) {
+                    if (customer.name) {
+                        document.getElementById('cust-name').value = customer.name;
+                    }
+                    if (customer.phone) {
+                        document.getElementById('cust-phone').value = customer.phone;
+                    }
+                }
+            } catch (e) {
+                console.error("Error reading ikko_customer from localStorage:", e);
+            }
         });
     </script>
 </body>

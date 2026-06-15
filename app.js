@@ -545,6 +545,8 @@ function renderHeader() {
     if (!headerPlaceholder) return;
     
     const cartCount = getCartCount();
+    const customer = JSON.parse(localStorage.getItem('ikko_customer'));
+    const accountText = customer ? 'ACCOUNT' : 'LOGIN';
     
     headerPlaceholder.innerHTML = `
         <div class="announcement-bar">
@@ -581,7 +583,7 @@ function renderHeader() {
                 <a href="collections.html?type=all" class="nav-item">SHOP ALL</a>
                 <a href="collections.html?type=tablets" class="nav-item">TABLETS</a>
                 <a href="collections.html?type=smart-phone" class="nav-item">SMART PHONE</a>
-                <a href="admin.html" class="nav-item">LOGIN</a>
+                <a href="account.html" class="nav-item">${accountText}</a>
             </div>
         </nav>
     `;
@@ -646,7 +648,7 @@ function renderFooter() {
                     <ul>
                         <li><a href="index.html">Home</a></li>
                         <li><a href="index.html?tab=all">Shop All</a></li>
-                        <li><a href="admin.html">Admin Dashboard</a></li>
+                        <li><a href="account.html">My Account</a></li>
                         <li><a href="about-us.html">About Us</a></li>
                     </ul>
                 </div>
