@@ -89,25 +89,25 @@
             element.classList.add('active');
         }
 
-        function handleBuyNow() {
+        async function handleBuyNow() {
             const qty = parseInt(document.getElementById('pdp-qty').value) || 1;
-            addToCart(selectedProduct.id, qty);
+            await addToCart(selectedProduct.id, qty);
             // Redirect straight to checkout
             window.location.href = 'checkout.html';
         }
 
-        function handleAddToCartPDP() {
+        async function handleAddToCartPDP() {
             const qty = parseInt(document.getElementById('pdp-qty').value) || 1;
-            addToCart(selectedProduct.id, qty);
+            await addToCart(selectedProduct.id, qty);
         }
 
-        function renderPDP() {
+        async function renderPDP() {
             const container = document.getElementById('product-details-container');
             if (!container) return;
 
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
-            const products = getProducts();
+            const products = await getProducts();
             
             selectedProduct = products.find(p => String(p.id) === String(productId));
             if (!selectedProduct) {
@@ -294,14 +294,14 @@
                 </div>
             `;
 
-            renderRelatedProducts();
+            await renderRelatedProducts();
         }
 
-        function renderRelatedProducts() {
+        async function renderRelatedProducts() {
             const grid = document.getElementById('related-products-grid');
             if (!grid) return;
 
-            const products = getProducts();
+            const products = await getProducts();
             const category = getProductCategory(selectedProduct);
             
             // Filter products of same category, excluding current product

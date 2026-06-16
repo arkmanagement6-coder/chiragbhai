@@ -200,7 +200,7 @@
             }
         }
 
-        function loadCollectionData() {
+        async function loadCollectionData() {
             const urlParams = new URLSearchParams(window.location.search);
             currentType = urlParams.get('type') || 'all';
 
@@ -216,7 +216,7 @@
             if (activeSidebarLink) activeSidebarLink.classList.add('active');
 
             // Get products
-            const allProducts = getProducts();
+            const allProducts = await getProducts();
             
             // Filter by type
             if (currentType === 'all') {
@@ -232,7 +232,7 @@
             handleSortChange();
         }
 
-        function handleSortChange() {
+        async function handleSortChange() {
             const sortVal = document.getElementById('sort-selector').value;
 
             if (sortVal === 'price-low') {
@@ -251,7 +251,7 @@
                 sortedProducts.sort((a, b) => a.title.localeCompare(b.title));
             } else {
                 // Featured (default load order)
-                const allProducts = getProducts();
+                const allProducts = await getProducts();
                 if (currentType === 'all') {
                     sortedProducts = [...allProducts];
                 } else {

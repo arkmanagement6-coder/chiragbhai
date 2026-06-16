@@ -400,7 +400,7 @@
         }
 
         // Open modal when customer clicks "Order Now"
-        function handleOrangeOrderNowClick() {
+        async function handleOrangeOrderNowClick() {
             if (!selectedPaymentMethod) {
                 alert('Please select a payment method.');
                 return;
@@ -461,11 +461,11 @@
             if (settings.sabpaisaEnabled) {
                 if (settings.sabpaisaMode === 'test') {
                     // Redirect directly to the product's Razorpay payment link
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         clearCart();
                         let paymentLink = 'https://razorpay.me/@luckydigitalmedia';
                         if (cart.length > 0) {
-                            const products = getProducts();
+                            const products = await getProducts();
                             const matchingProduct = products.find(p => String(p.id) === String(cart[0].id));
                             if (matchingProduct && matchingProduct.paymentLink) {
                                 paymentLink = matchingProduct.paymentLink;
@@ -559,11 +559,11 @@
                 });
             } else {
                 // Redirect directly to the product's Razorpay payment link
-                setTimeout(() => {
+                setTimeout(async () => {
                     clearCart();
                     let paymentLink = 'https://razorpay.me/@luckydigitalmedia';
                     if (cart.length > 0) {
-                        const products = getProducts();
+                        const products = await getProducts();
                         const matchingProduct = products.find(p => String(p.id) === String(cart[0].id));
                         if (matchingProduct && matchingProduct.paymentLink) {
                             paymentLink = matchingProduct.paymentLink;

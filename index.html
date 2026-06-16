@@ -75,11 +75,11 @@
             renderStorefront();
         }
 
-        function renderStorefront() {
+        async function renderStorefront() {
             const grid = document.getElementById('products-grid-container');
             if (!grid) return;
 
-            const products = getProducts();
+            const products = await getProducts();
             
             // Filter products
             let filteredProducts = products;

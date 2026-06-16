@@ -458,6 +458,12 @@ function getSettings() {
         changed = true;
     }
     
+    if (settings.firebaseEnabled === undefined) {
+        settings.firebaseEnabled = false;
+        settings.firebaseConfig = '';
+        changed = true;
+    }
+    
     if (changed) {
         localStorage.setItem('ikko_settings', JSON.stringify(settings));
     }
@@ -468,16 +474,105 @@ function saveSettings(settings) {
     localStorage.setItem('ikko_settings', JSON.stringify(settings));
 }
 
-// Product Database Helpers
-function getProducts() {
+// Firebase Dynamic Loader & Global Instance State
+let firebaseDB = null;
+let firebaseInitialized = false;
+
+async function initFirebase() {
+    if (firebaseInitialized) return firebaseDB;
+
+    const settings = getSettings();
+    if (!settings.firebaseEnabled || !settings.firebaseConfig) {
+        return null; // Fallback to localStorage
+    }
+
+    try {
+        let config;
+        if (typeof settings.firebaseConfig === 'string') {
+            config = JSON.parse(settings.firebaseConfig);
+        } else {
+            config = settings.firebaseConfig;
+        }
+
+        if (!config || !config.apiKey || !config.projectId) {
+            return null;
+        }
+
+        // Helper to load dynamic scripts sequentially
+        const loadScript = (src) => {
+            return new Promise((resolve, reject) => {
+                if (document.querySelector(`script[src="${src}"]`)) {
+                    resolve();
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        };
+
+        // Load compatibility packages to avoid ESM refactoring overhead
+        await loadScript("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
+        await loadScript("https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js");
+
+        if (window.firebase) {
+            let app;
+            if (!window.firebase.apps.length) {
+                app = window.firebase.initializeApp(config);
+            } else {
+                app = window.firebase.app();
+            }
+            firebaseDB = window.firebase.firestore(app);
+            firebaseInitialized = true;
+            console.log("🔥 Firebase Firestore connected successfully!");
+            return firebaseDB;
+        }
+    } catch (e) {
+        console.error("Error initializing Firebase:", e);
+    }
+    return null;
+}
+
+// Product Database Helpers (Firestore Async with local Cache fallback)
+async function getProducts() {
     dbInit();
+    const db = await initFirebase();
+    
+    if (db) {
+        try {
+            const snapshot = await db.collection('products').get();
+            let products = [];
+            snapshot.forEach(doc => {
+                products.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Seed defaults if collection is empty
+            if (products.length === 0) {
+                console.log("Seeding Firestore with default products...");
+                for (const p of INITIAL_PRODUCTS) {
+                    const { id, ...data } = p;
+                    await db.collection('products').doc(String(id)).set(data);
+                    products.push(p);
+                }
+            }
+            
+            // Sync local storage cache
+            localStorage.setItem('ikko_products', JSON.stringify(products));
+            return products;
+        } catch (e) {
+            console.error("Error reading Firestore, falling back to local storage cache:", e);
+        }
+    }
+
     let products = JSON.parse(localStorage.getItem('ikko_products')) || [];
     let updated = false;
     
     // Auto-inject Demo Product or update its paymentLink if it matches the default fallback
-    const demoIndex = products.findIndex(p => p.id === '8270415000000_demo');
+    const demoIndex = products.findIndex(p => String(p.id) === '8270415000000_demo');
     if (demoIndex === -1) {
-        const demoProduct = INITIAL_PRODUCTS.find(p => p.id === '8270415000000_demo');
+        const demoProduct = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000000_demo');
         if (demoProduct) {
             products.unshift(demoProduct);
             updated = true;
@@ -503,8 +598,38 @@ function getProducts() {
     return products;
 }
 
-function saveProducts(products) {
+async function saveProducts(products) {
     localStorage.setItem('ikko_products', JSON.stringify(products));
+
+    const db = await initFirebase();
+    if (db) {
+        try {
+            // Write each product to Firestore
+            for (const p of products) {
+                const { id, ...data } = p;
+                await db.collection('products').doc(String(id)).set(data);
+            }
+            console.log("Synced products list to Firestore.");
+        } catch (e) {
+            console.error("Failed to save products to Firestore:", e);
+        }
+    }
+}
+
+async function deleteProduct(productId) {
+    let products = await getProducts();
+    products = products.filter(p => String(p.id) !== String(productId));
+    localStorage.setItem('ikko_products', JSON.stringify(products));
+
+    const db = await initFirebase();
+    if (db) {
+        try {
+            await db.collection('products').doc(String(productId)).delete();
+            console.log(`Product ${productId} deleted from Firestore.`);
+        } catch (e) {
+            console.error("Failed to delete product from Firestore:", e);
+        }
+    }
 }
 
 // Order Management Helpers
@@ -530,14 +655,14 @@ function saveCart(cart) {
     updateCartUI();
 }
 
-function addToCart(productId, qty = 1) {
+async function addToCart(productId, qty = 1) {
     const cart = getCart();
-    const products = getProducts();
-    const product = products.find(p => p.id === productId);
+    const products = await getProducts();
+    const product = products.find(p => String(p.id) === String(productId));
     
     if (!product) return;
     
-    const existingItem = cart.find(item => item.id === productId);
+    const existingItem = cart.find(item => String(item.id) === String(productId));
     if (existingItem) {
         existingItem.qty += qty;
     } else {
@@ -656,14 +781,14 @@ function renderHeader() {
     const searchDropdown = document.getElementById('search-results-dropdown');
     
     if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+        searchInput.addEventListener('input', async (e) => {
             const query = e.target.value.trim().toLowerCase();
             if (query.length < 2) {
                 searchDropdown.style.display = 'none';
                 return;
             }
             
-            const products = getProducts();
+            const products = await getProducts();
             const matches = products.filter(p => p.title.toLowerCase().includes(query)).slice(0, 5);
             
             if (matches.length === 0) {
