@@ -2,6 +2,19 @@
 
 const INITIAL_PRODUCTS = [
   {
+    "id": "8270415000000_demo",
+    "title": "Demo Product",
+    "handle": "demo-product",
+    "url": "/products/demo-product",
+    "price": "Rs. 1.00",
+    "comparePrice": "Rs. 1,000.00",
+    "badge": "99%",
+    "image": "demo_cake.png",
+    "images": [
+      "demo_cake.png"
+    ]
+  },
+  {
     "id": "8270415000000",
     "title": "Apple iPad Air 11″ (M2): Liquid Retina Display, 256GB, Landscape 12MP Front Camera / 12MP Back Camera, Wi-Fi 6E, Touch ID, All-Day Battery Life-Gray",
     "handle": "apple-ipad-air-11-m2-liquid-retina-display-256gb-landscape-12mp-front-camera-12mp-back-camera-wi-fi-6e-touch-id-all-day-battery-life-gray",
@@ -459,6 +472,17 @@ function getProducts() {
     dbInit();
     let products = JSON.parse(localStorage.getItem('ikko_products')) || [];
     let updated = false;
+    
+    // Auto-inject Demo Product if not exists
+    const hasDemo = products.some(p => p.id === '8270415000000_demo');
+    if (!hasDemo) {
+        const demoProduct = INITIAL_PRODUCTS.find(p => p.id === '8270415000000_demo');
+        if (demoProduct) {
+            products.unshift(demoProduct);
+            updated = true;
+        }
+    }
+
     products = products.map(p => {
         if (!p.paymentLink) {
             p.paymentLink = 'https://razorpay.me/@luckydigitalmedia';
