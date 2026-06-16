@@ -109,7 +109,7 @@
             const productId = urlParams.get('id');
             const products = getProducts();
             
-            selectedProduct = products.find(p => p.id === productId);
+            selectedProduct = products.find(p => String(p.id) === String(productId));
             if (!selectedProduct) {
                 // Fallback to first product if none selected or invalid ID
                 selectedProduct = products[0];
