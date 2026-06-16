@@ -12,7 +12,8 @@ const INITIAL_PRODUCTS = [
     "image": "demo_cake.png",
     "images": [
       "demo_cake.png"
-    ]
+    ],
+    "paymentLink": "https://rzp.io/rzp/tHlmofq"
   },
   {
     "id": "8270415000000",
@@ -473,12 +474,18 @@ function getProducts() {
     let products = JSON.parse(localStorage.getItem('ikko_products')) || [];
     let updated = false;
     
-    // Auto-inject Demo Product if not exists
-    const hasDemo = products.some(p => p.id === '8270415000000_demo');
-    if (!hasDemo) {
+    // Auto-inject Demo Product or update its paymentLink if it matches the default fallback
+    const demoIndex = products.findIndex(p => p.id === '8270415000000_demo');
+    if (demoIndex === -1) {
         const demoProduct = INITIAL_PRODUCTS.find(p => p.id === '8270415000000_demo');
         if (demoProduct) {
             products.unshift(demoProduct);
+            updated = true;
+        }
+    } else {
+        // Force update paymentLink of demo product if it's using the old fallback
+        if (products[demoIndex].paymentLink === 'https://razorpay.me/@luckydigitalmedia' || !products[demoIndex].paymentLink) {
+            products[demoIndex].paymentLink = 'https://rzp.io/rzp/tHlmofq';
             updated = true;
         }
     }
