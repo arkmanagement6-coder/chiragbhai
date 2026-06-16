@@ -465,7 +465,17 @@
                         clearCart();
                         const upiId = settings.upiId || 'sabpaisa.lucky06@hdfcbank';
                         const merchant = settings.merchantName || 'JARVIS AI';
-                        window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}`;
+                        
+                        let paymentLink = 'https://razorpay.me/@luckydigitalmedia';
+                        if (cart.length > 0) {
+                            const products = getProducts();
+                            const matchingProduct = products.find(p => p.id === cart[0].id);
+                            if (matchingProduct && matchingProduct.paymentLink) {
+                                paymentLink = matchingProduct.paymentLink;
+                            }
+                        }
+                        
+                        window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}&payment_link=${encodeURIComponent(paymentLink)}`;
                     }, 1000);
                     return;
                 }
@@ -557,7 +567,17 @@
                     clearCart();
                     const upiId = settings.upiId || 'sabpaisa.lucky06@hdfcbank';
                     const merchant = settings.merchantName || 'JARVIS AI';
-                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}`;
+                    
+                    let paymentLink = 'https://razorpay.me/@luckydigitalmedia';
+                    if (cart.length > 0) {
+                        const products = getProducts();
+                        const matchingProduct = products.find(p => p.id === cart[0].id);
+                        if (matchingProduct && matchingProduct.paymentLink) {
+                            paymentLink = matchingProduct.paymentLink;
+                        }
+                    }
+                    
+                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}&payment_link=${encodeURIComponent(paymentLink)}`;
                 }, 1000);
             }
         }

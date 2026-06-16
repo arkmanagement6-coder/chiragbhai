@@ -290,7 +290,9 @@
                 paymentText = 'Cash on Delivery (COD)';
             } else if (order.paymentMethod === 'upi') {
                 const providerLabel = order.upiProvider ? (order.upiProvider === 'phonepe' ? 'PhonePe' : (order.upiProvider === 'paytm' ? 'Paytm' : (order.upiProvider === 'gpay' ? 'Google Pay' : 'SCAN PAY'))) : 'UPI QR';
-                if (order.utr === 'Real-Time Verified') {
+                if (order.utr === 'Razorpay Verified') {
+                    paymentText = `Online Payment (${providerLabel})`;
+                } else if (order.utr === 'Real-Time Verified') {
                     paymentText = `${providerLabel} (Real-Time Confirmed)`;
                 } else if (order.utr === 'Auto-Verified') {
                     paymentText = `${providerLabel} (Auto-Verified)`;
@@ -325,7 +327,7 @@
                         <h3>Billing & Payment</h3>
                         <p>
                             <strong>Method:</strong> ${paymentText}<br>
-                            <strong>Status:</strong> ${order.utr === 'Real-Time Verified' || order.utr === 'Auto-Verified' ? 'Paid & Confirmed' : (order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery')}<br>
+                            <strong>Status:</strong> ${order.utr === 'Real-Time Verified' || order.utr === 'Auto-Verified' || order.utr === 'Razorpay Verified' ? 'Paid & Confirmed' : (order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery')}<br>
                             <strong>Expected Delivery:</strong> 3-5 Business Days
                         </p>
                     </div>

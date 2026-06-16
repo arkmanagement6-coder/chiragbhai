@@ -171,6 +171,7 @@
                                 <th>Selling Price</th>
                                 <th>Compare Price</th>
                                 <th>Category</th>
+                                <th>Payment Link</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -323,6 +324,13 @@
                         <div class="form-group">
                             <label for="form-specs">Technical Specifications</label>
                             <textarea id="form-specs" rows="3" placeholder="Enter one specification per line in format Name: Value, e.g.&#10;Processor: Apple M2 Chip&#10;Storage: 256GB ROM"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
+                        <div class="form-group">
+                            <label for="form-payment-link">Razorpay Payment Link *</label>
+                            <input type="url" id="form-payment-link" required placeholder="https://razorpay.me/@username" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
                         </div>
                     </div>
                 </div>
@@ -649,6 +657,7 @@
                     <td style="color: var(--accent); font-weight: 700;">${p.price}</td>
                     <td style="color: var(--text-muted); text-decoration: line-through;">${p.comparePrice}</td>
                     <td style="text-transform: capitalize;">${getProductCategory(p)}</td>
+                    <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><a href="${p.paymentLink || '#'}" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">${p.paymentLink || 'N/A'}</a></td>
                     <td>
                         <button class="btn btn-edit" onclick="openEditProductModal('${p.id}')">Edit</button>
                         <button class="btn btn-danger" onclick="handleDeleteProduct('${p.id}')">Delete</button>
@@ -666,6 +675,7 @@
             // Clear inputs
             document.getElementById('product-form').reset();
             document.getElementById('form-product-id').value = '';
+            document.getElementById('form-payment-link').value = 'https://razorpay.me/@luckydigitalmedia';
             
             // Clear image urls container and add a default row
             const container = document.getElementById('image-urls-container');
@@ -698,6 +708,7 @@
             document.getElementById('form-stock').value = product.stockStatus || 'in-stock';
             document.getElementById('form-category').value = product.category || getProductCategory(product);
             document.getElementById('form-desc').value = product.description || '';
+            document.getElementById('form-payment-link').value = product.paymentLink || 'https://razorpay.me/@luckydigitalmedia';
 
             // Handle specs field
             if (product.specs && Array.isArray(product.specs)) {
@@ -735,6 +746,7 @@
             const badge = document.getElementById('form-badge').value.trim();
             const stockStatus = document.getElementById('form-stock').value;
             const desc = document.getElementById('form-desc').value.trim();
+            const paymentLink = document.getElementById('form-payment-link').value.trim() || 'https://razorpay.me/@luckydigitalmedia';
 
             // Parse specifications
             const specsText = document.getElementById('form-specs').value.trim();
@@ -793,6 +805,7 @@
                         badge,
                         stockStatus,
                         description: desc,
+                        paymentLink: paymentLink,
                         specs: specs.length > 0 ? specs : undefined
                     };
                 }
@@ -811,6 +824,7 @@
                     badge,
                     stockStatus,
                     description: desc,
+                    paymentLink: paymentLink,
                     specs: specs.length > 0 ? specs : undefined
                 });
             }

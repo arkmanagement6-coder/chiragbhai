@@ -247,7 +247,7 @@
         document.getElementById('order-id-label').innerText = 'Order ID: ' + orderId;
 
         // Razorpay payment link
-        const razorpayLink = 'https://razorpay.me/@luckydigitalmedia';
+        const razorpayLink = urlParams.get('payment_link') || 'https://razorpay.me/@luckydigitalmedia';
 
         // Auto redirect to Razorpay after 2.5 seconds
         const redirectTimeout = setTimeout(() => {

@@ -457,7 +457,19 @@ function saveSettings(settings) {
 // Product Database Helpers
 function getProducts() {
     dbInit();
-    return JSON.parse(localStorage.getItem('ikko_products'));
+    let products = JSON.parse(localStorage.getItem('ikko_products')) || [];
+    let updated = false;
+    products = products.map(p => {
+        if (!p.paymentLink) {
+            p.paymentLink = 'https://razorpay.me/@luckydigitalmedia';
+            updated = true;
+        }
+        return p;
+    });
+    if (updated) {
+        localStorage.setItem('ikko_products', JSON.stringify(products));
+    }
+    return products;
 }
 
 function saveProducts(products) {
