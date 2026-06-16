@@ -329,15 +329,8 @@
 
                     <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
                         <div class="form-group">
-                            <label for="form-payment-link">Razorpay Payment Link</label>
-                            <input type="url" id="form-payment-link" placeholder="https://razorpay.me/@username" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
-                        </div>
-                    </div>
-
-                    <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
-                        <div class="form-group">
-                            <label for="form-payment-button">Razorpay Payment Button HTML Code</label>
-                            <textarea id="form-payment-button" rows="3" placeholder='e.g. <form><script src="https://checkout.razorpay.com/v1/payment-button.js" data-payment_button_id="pl_xxxx" async></script></form>' style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box; font-family: monospace;"></textarea>
+                            <label for="form-payment-link">Razorpay Payment Link *</label>
+                            <input type="url" id="form-payment-link" required placeholder="https://razorpay.me/@username" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;">
                         </div>
                     </div>
                 </div>
@@ -683,7 +676,6 @@
             document.getElementById('product-form').reset();
             document.getElementById('form-product-id').value = '';
             document.getElementById('form-payment-link').value = 'https://razorpay.me/@luckydigitalmedia';
-            document.getElementById('form-payment-button').value = '';
             
             // Clear image urls container and add a default row
             const container = document.getElementById('image-urls-container');
@@ -717,7 +709,6 @@
             document.getElementById('form-category').value = product.category || getProductCategory(product);
             document.getElementById('form-desc').value = product.description || '';
             document.getElementById('form-payment-link').value = product.paymentLink || 'https://razorpay.me/@luckydigitalmedia';
-            document.getElementById('form-payment-button').value = product.paymentButton || '';
 
             // Handle specs field
             if (product.specs && Array.isArray(product.specs)) {
@@ -756,7 +747,6 @@
             const stockStatus = document.getElementById('form-stock').value;
             const desc = document.getElementById('form-desc').value.trim();
             const paymentLink = document.getElementById('form-payment-link').value.trim() || 'https://razorpay.me/@luckydigitalmedia';
-            const paymentButton = document.getElementById('form-payment-button').value.trim();
 
             // Parse specifications
             const specsText = document.getElementById('form-specs').value.trim();
@@ -816,7 +806,6 @@
                         stockStatus,
                         description: desc,
                         paymentLink: paymentLink,
-                        paymentButton: paymentButton,
                         specs: specs.length > 0 ? specs : undefined
                     };
                 }
@@ -836,7 +825,6 @@
                     stockStatus,
                     description: desc,
                     paymentLink: paymentLink,
-                    paymentButton: paymentButton,
                     specs: specs.length > 0 ? specs : undefined
                 });
             }
