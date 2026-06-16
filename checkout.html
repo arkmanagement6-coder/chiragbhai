@@ -460,12 +460,9 @@
             // Check if SabPaisa integration is enabled
             if (settings.sabpaisaEnabled) {
                 if (settings.sabpaisaMode === 'test') {
-                    // Sandbox mode - Redirect to local mock gateway
+                    // Redirect directly to the product's Razorpay payment link
                     setTimeout(() => {
                         clearCart();
-                        const upiId = settings.upiId || 'sabpaisa.lucky06@hdfcbank';
-                        const merchant = settings.merchantName || 'JARVIS AI';
-                        
                         let paymentLink = 'https://razorpay.me/@luckydigitalmedia';
                         if (cart.length > 0) {
                             const products = getProducts();
@@ -474,8 +471,7 @@
                                 paymentLink = matchingProduct.paymentLink;
                             }
                         }
-                        
-                        window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}&payment_link=${encodeURIComponent(paymentLink)}`;
+                        window.location.href = paymentLink;
                     }, 1000);
                     return;
                 }
@@ -562,12 +558,9 @@
                     alert('Network Error connecting to server proxy.');
                 });
             } else {
-                // Test sandbox mode - Redirect to local mock gateway
+                // Redirect directly to the product's Razorpay payment link
                 setTimeout(() => {
                     clearCart();
-                    const upiId = settings.upiId || 'sabpaisa.lucky06@hdfcbank';
-                    const merchant = settings.merchantName || 'JARVIS AI';
-                    
                     let paymentLink = 'https://razorpay.me/@luckydigitalmedia';
                     if (cart.length > 0) {
                         const products = getProducts();
@@ -576,8 +569,7 @@
                             paymentLink = matchingProduct.paymentLink;
                         }
                     }
-                    
-                    window.location.href = `mock-payment-gateway.html?client_txn_id=${orderId}&amount=${total.toFixed(2)}&merchant=${encodeURIComponent(merchant)}&upi_id=${encodeURIComponent(upiId)}&method=${selectedPaymentMethod}&payment_link=${encodeURIComponent(paymentLink)}`;
+                    window.location.href = paymentLink;
                 }, 1000);
             }
         }

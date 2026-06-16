@@ -247,7 +247,7 @@
             if (status) {
                 if (status === 'success' || status === 'successful') {
                     order.status = 'pending';
-                    order.utr = 'Real-Time Verified';
+                    order.utr = 'Razorpay Verified';
                 } else if (status === 'failure' || status === 'failed') {
                     order.status = 'cancelled';
                     order.utr = 'Payment Failed';
@@ -328,7 +328,7 @@
                         <p>
                             <strong>Method:</strong> ${paymentText}<br>
                             <strong>Status:</strong> ${order.utr === 'Real-Time Verified' || order.utr === 'Auto-Verified' || order.utr === 'Razorpay Verified' ? 'Paid & Confirmed' : (order.paymentMethod === 'upi' ? 'Awaiting Verification' : 'Awaiting Delivery')}<br>
-                            <strong>Expected Delivery:</strong> 3-5 Business Days
+                            <strong>Expected Delivery:</strong> Your order will be delivered next 7 days
                         </p>
                     </div>
                 </div>
