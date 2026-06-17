@@ -1939,17 +1939,24 @@ button, input, select, textarea {
         margin-bottom: 20px !important;
         table-layout: auto !important;
     }
+    .pdp-description th,
     .pdp-description td {
-        padding: 10px 8px !important;
+        padding: 10px 10px !important;
         font-size: 0.9rem !important;
         border-bottom: 1px solid var(--border-color) !important;
         word-break: break-word !important;
+        text-align: left !important;
+        vertical-align: top !important;
     }
-    .pdp-description td.a-span3 {
+    .pdp-description tr th:first-child:not(:last-child),
+    .pdp-description tr td:first-child:not(:last-child) {
         width: 35% !important;
+        min-width: 125px !important;
+        font-weight: 700 !important;
+        color: var(--text-main) !important;
     }
-    .pdp-description td.a-span9 {
-        width: 65% !important;
+    .pdp-description tr td:last-child {
+        width: auto !important;
     }
     .pdp-description ul {
         margin: 15px 0 15px 20px !important;
