@@ -7,6 +7,6 @@
   "upiEnabled": true,
   "upiId": "sabpaisa.lucky06@hdfcbank",
   "merchantName": "JARVIS AI",
-  "firebaseEnabled": false,
+  "firebaseEnabled": true,
   "firebaseConfig": ""
 }
