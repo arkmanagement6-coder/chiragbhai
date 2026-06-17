@@ -708,6 +708,30 @@ async function initFirebase() {
     return null;
 }
 
+// Helper to clean undefined fields before saving to Firestore
+function cleanUndefinedFields(obj) {
+    if (obj === null || obj === undefined) {
+        return null;
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(item => cleanUndefinedFields(item)).filter(item => item !== undefined);
+    }
+    if (typeof obj === 'object') {
+        const cleaned = {};
+        for (const key in obj) {
+            const val = obj[key];
+            if (val !== undefined) {
+                const cleanedVal = cleanUndefinedFields(val);
+                if (cleanedVal !== undefined) {
+                    cleaned[key] = cleanedVal;
+                }
+            }
+        }
+        return cleaned;
+    }
+    return obj;
+}
+
 // Product Database Helpers (Firestore Async with local Cache fallback)
 async function getProducts() {
     dbInit();
@@ -744,7 +768,7 @@ async function getProducts() {
             if (products.length === 0) {
                 console.log("Seeding Firestore with default products...");
                 for (const p of INITIAL_PRODUCTS) {
-                    await db.collection('products').doc(String(p.id)).set(p);
+                    await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
                     products.push(p);
                 }
             }
@@ -798,7 +822,7 @@ async function saveProducts(products) {
         try {
             // Write each product to Firestore
             for (const p of products) {
-                await db.collection('products').doc(String(p.id)).set(p);
+                await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
             }
             console.log("Synced products list to Firestore.");
         } catch (e) {
