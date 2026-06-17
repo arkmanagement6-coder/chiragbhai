@@ -1913,18 +1913,43 @@ button, input, select, textarea {
         grid-template-columns: 1fr;
         padding: 20px;
         gap: 30px;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    .pdp-images {
+        max-width: 100%;
+        overflow: hidden;
+    }
+    .pdp-thumbnails {
+        max-width: 100%;
+    }
+    .pdp-description,
+    .pdp-description * {
+        max-width: 100% !important;
+    }
+    .pdp-description div,
+    .pdp-description span,
+    .pdp-description p {
+        width: auto !important;
     }
     .pdp-description table {
         width: 100% !important;
         max-width: 100% !important;
         border-collapse: collapse !important;
         margin-bottom: 20px !important;
+        table-layout: auto !important;
     }
     .pdp-description td {
-        width: auto !important;
         padding: 10px 8px !important;
         font-size: 0.9rem !important;
         border-bottom: 1px solid var(--border-color) !important;
+        word-break: break-word !important;
+    }
+    .pdp-description td.a-span3 {
+        width: 35% !important;
+    }
+    .pdp-description td.a-span9 {
+        width: 65% !important;
     }
     .pdp-description ul {
         margin: 15px 0 15px 20px !important;
