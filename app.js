@@ -40,6 +40,9 @@
         if (path.includes('order-confirmation.html')) {
             const urlParams = new URLSearchParams(window.location.search);
             let orderId = urlParams.get('orderId') || urlParams.get('client_txn_id') || urlParams.get('merchant_txn_id');
+            let status = urlParams.get('status');
+            if (status) status = status.toLowerCase();
+            
             const orders = JSON.parse(localStorage.getItem('ikko_orders')) || [];
             let order = null;
             if (orderId) {
@@ -48,7 +51,10 @@
                 order = orders[orders.length - 1];
             }
             
-            if (order && (order.status !== 'cancelled' && order.utr !== 'Payment Failed')) {
+            const isSuccess = (status === 'success' || status === 'successful') || 
+                              (order && order.status !== 'cancelled' && order.utr !== 'Payment Failed');
+            
+            if (order && isSuccess) {
                 let totalVal = 999;
                 if (order.total) {
                     const cleaned = String(order.total).replace(/[^\d.]/g, '');
