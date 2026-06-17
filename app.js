@@ -1,5 +1,94 @@
 // Global State and Core Logic for IKKO Digital E-commerce Store
 
+// Meta Pixel Initialization & Tracking Logic
+(function() {
+    const pixelId = '947390424330740';
+    
+    // Initialize standard Meta Pixel tracking snippet
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    
+    fbq('init', pixelId);
+    fbq('track', 'PageView');
+    
+    // Add pixel image fallback for browsers with JS disabled/blocked
+    window.addEventListener('DOMContentLoaded', () => {
+        const noscript = document.createElement('noscript');
+        const img = document.createElement('img');
+        img.height = 1;
+        img.width = 1;
+        img.style.display = 'none';
+        img.src = `https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`;
+        noscript.appendChild(img);
+        document.body.appendChild(noscript);
+        
+        // Track page-specific actions dynamically
+        const path = window.location.pathname.toLowerCase();
+        
+        // Track Checkout Page (InitiateCheckout)
+        if (path.includes('checkout.html')) {
+            fbq('track', 'InitiateCheckout');
+        }
+        
+        // Track Purchase Page (Purchase)
+        if (path.includes('order-confirmation.html')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            let orderId = urlParams.get('orderId') || urlParams.get('client_txn_id') || urlParams.get('merchant_txn_id');
+            const orders = JSON.parse(localStorage.getItem('ikko_orders')) || [];
+            let order = null;
+            if (orderId) {
+                order = orders.find(o => o.id === orderId);
+            } else if (orders.length > 0) {
+                order = orders[orders.length - 1];
+            }
+            
+            if (order && (order.status !== 'cancelled' && order.utr !== 'Payment Failed')) {
+                let totalVal = 999;
+                if (order.total) {
+                    const cleaned = String(order.total).replace(/[^\d.]/g, '');
+                    const parsed = parseFloat(cleaned);
+                    if (!isNaN(parsed)) totalVal = parsed;
+                }
+                fbq('track', 'Purchase', {
+                    value: totalVal,
+                    currency: 'INR',
+                    content_type: 'product',
+                    content_ids: order.items.map(item => String(item.id))
+                });
+            }
+        }
+        
+        // Track Product Page (ViewContent)
+        if (path.includes('product.html')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            const products = JSON.parse(localStorage.getItem('ikko_products')) || [];
+            const prod = products.find(p => String(p.id) === String(productId));
+            if (prod) {
+                let priceVal = 999;
+                if (prod.price) {
+                    const cleaned = String(prod.price).replace(/[^\d.]/g, '');
+                    const parsed = parseFloat(cleaned);
+                    if (!isNaN(parsed)) priceVal = parsed;
+                }
+                fbq('track', 'ViewContent', {
+                    content_ids: [String(prod.id)],
+                    content_name: prod.title,
+                    content_type: 'product',
+                    value: priceVal,
+                    currency: 'INR'
+                });
+            }
+        }
+    });
+})();
+
 const INITIAL_PRODUCTS = [
   {
     "id": "8270415000000_demo",
@@ -946,6 +1035,24 @@ async function addToCart(productId, qty = 1) {
             qty: qty
         });
     }
+    
+    // Meta Pixel AddToCart Event
+    if (typeof fbq === 'function') {
+        let priceVal = 999;
+        if (product.price) {
+            const cleaned = String(product.price).replace(/[^\d.]/g, '');
+            const parsed = parseFloat(cleaned);
+            if (!isNaN(parsed)) priceVal = parsed;
+        }
+        fbq('track', 'AddToCart', {
+            content_ids: [String(product.id)],
+            content_name: product.title,
+            content_type: 'product',
+            value: priceVal,
+            currency: 'INR'
+        });
+    }
+
     saveCart(cart);
     openCartDrawer();
 }
