@@ -917,10 +917,17 @@
 
             const products = await getProducts();
 
-            container.innerHTML = products.map(p => `
+            container.innerHTML = products.map(p => {
+                const isOutOfStock = p.stockStatus === 'out-of-stock';
+                const stockBadge = isOutOfStock 
+                    ? `<span style="background-color: #ef4444; color: white; font-size: 0.7rem; font-weight: 700; padding: 3px 6px; border-radius: 4px; margin-right: 8px; text-transform: uppercase; display: inline-block; vertical-align: middle; line-height: 1;">Out of Stock</span>` 
+                    : '';
+                return `
                 <tr>
                     <td><img src="${p.image}" class="admin-product-img" alt=""></td>
-                    <td style="font-weight: 600; max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${p.title}</td>
+                    <td style="font-weight: 600; max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.title}">
+                        ${stockBadge}${p.title}
+                    </td>
                     <td style="color: var(--accent); font-weight: 700;">${p.price}</td>
                     <td style="color: var(--text-muted); text-decoration: line-through;">${p.comparePrice}</td>
                     <td style="text-transform: capitalize;">${getProductCategory(p)}</td>
@@ -930,7 +937,8 @@
                         <button class="btn btn-danger" onclick="handleDeleteProduct('${p.id}')">Delete</button>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Product Modal Controllers
