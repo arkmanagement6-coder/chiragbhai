@@ -981,6 +981,26 @@ button, input, select, textarea {
     width: 100% !important;
     max-width: 100% !important;
     table-layout: auto !important;
+    border-collapse: collapse !important;
+    margin-bottom: 20px !important;
+}
+.pdp-description th,
+.pdp-description td {
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: top;
+}
+.pdp-description tr th:first-child:not(:last-child),
+.pdp-description tr td:first-child:not(:last-child) {
+    width: 30% !important;
+    min-width: 180px !important;
+    font-weight: 700;
+    color: var(--text-main);
+}
+.pdp-description tr td:last-child {
+    width: auto !important;
 }
 .pdp-description p {
     margin-bottom: 15px;
