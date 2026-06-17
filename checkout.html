@@ -14,21 +14,16 @@
     <main class="checkout-container">
         
         <!-- Progress Stepper Tracker -->
-        <div class="checkout-progress-wrapper" style="display: none;">
+        <div class="checkout-progress-wrapper">
             <div class="progress-bar-container">
                 <div class="progress-step active" id="step-indicator-address">
                     <span class="step-icon">1</span>
-                    <span class="step-label">Address</span>
+                    <span class="step-label">Address Details</span>
                 </div>
                 <div class="progress-line" id="line-1"></div>
-                <div class="progress-step" id="step-indicator-summary">
-                    <span class="step-icon">2</span>
-                    <span class="step-label">Order Summary</span>
-                </div>
-                <div class="progress-line" id="line-2"></div>
                 <div class="progress-step" id="step-indicator-payment">
-                    <span class="step-icon">3</span>
-                    <span class="step-label">Payment</span>
+                    <span class="step-icon">2</span>
+                    <span class="step-label">Payment & Summary</span>
                 </div>
             </div>
         </div>
@@ -220,7 +215,7 @@
                 </div>
 
                 <!-- Inline Edit Address Option -->
-                <div style="text-align: center; margin-top: 15px; display: none;">
+                <div style="text-align: center; margin-top: 15px; display: block;">
                     <button type="button" class="link-edit-btn" onclick="showWizardStep(1)">✏️ Edit Shipping Address</button>
                 </div>
             </div>
@@ -275,7 +270,7 @@
             const stickyBar = document.getElementById('sticky-bottom-action-bar');
             
             const indAddress = document.getElementById('step-indicator-address');
-            const indSummary = document.getElementById('step-indicator-summary');
+            const indPayment = document.getElementById('step-indicator-payment');
             
             if (step === 1) {
                 addressSec.style.display = 'block';
@@ -285,7 +280,7 @@
                 indAddress.classList.add('active');
                 indAddress.classList.remove('completed');
                 indAddress.querySelector('.step-icon').innerText = '1';
-                indSummary.classList.remove('active');
+                indPayment.classList.remove('active');
             } else if (step === 2) {
                 addressSec.style.display = 'none';
                 paymentSec.style.display = 'block';
@@ -298,7 +293,7 @@
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                 `;
-                indSummary.classList.add('active');
+                indPayment.classList.add('active');
                 
                 // Calculate pricing
                 renderCheckoutSummary();
@@ -580,15 +575,9 @@
         }
 
         window.addEventListener('load', () => {
-            // Pre-fill dummy values if empty to pass form validation and payment gateway requirements
-            if (!document.getElementById('cust-name').value) document.getElementById('cust-name').value = 'Direct Customer';
-            if (!document.getElementById('cust-phone').value) document.getElementById('cust-phone').value = '9999999999';
-            if (!document.getElementById('cust-address').value) document.getElementById('cust-address').value = 'Online Purchase Address';
-            if (!document.getElementById('cust-city').value) document.getElementById('cust-city').value = 'New Delhi';
-            if (!document.getElementById('cust-state').value) document.getElementById('cust-state').value = 'Delhi';
-            if (!document.getElementById('cust-pin').value) document.getElementById('cust-pin').value = '110001';
-
-            showWizardStep(2);
+            // Do not pre-fill dummy values so the user is forced to enter their own shipping details
+            // We start at Step 1 (Address Form) as requested by the user
+            showWizardStep(1);
             
             // Render the checkout summary on load so the "Order Items" block is populated on Step 1
             renderCheckoutSummary();
