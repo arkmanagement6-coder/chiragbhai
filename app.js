@@ -569,6 +569,25 @@ function dbInit() {
     }
 }
 
+// Global settings loading promise
+window.settingsLoadingPromise = loadGlobalSettings();
+
+async function loadGlobalSettings() {
+    try {
+        const res = await fetch('/settings.json');
+        if (res.ok) {
+            const globalSettings = await res.json();
+            const localSettings = JSON.parse(localStorage.getItem('ikko_settings')) || {};
+            // Merge settings: local overrides take precedence for admin convenience
+            const mergedSettings = { ...globalSettings, ...localSettings };
+            localStorage.setItem('ikko_settings', JSON.stringify(mergedSettings));
+            console.log("Global settings loaded and merged successfully.");
+        }
+    } catch (e) {
+        console.warn("Failed to load global settings from server:", e);
+    }
+}
+
 // Settings Helpers
 function getSettings() {
     dbInit();
@@ -621,6 +640,10 @@ let firebaseInitialized = false;
 
 async function initFirebase() {
     if (firebaseInitialized) return firebaseDB;
+
+    if (window.settingsLoadingPromise) {
+        await window.settingsLoadingPromise;
+    }
 
     const settings = getSettings();
     if (!settings.firebaseEnabled || !settings.firebaseConfig) {
@@ -693,17 +716,35 @@ async function getProducts() {
     if (db) {
         try {
             const snapshot = await db.collection('products').get();
-            let products = [];
+            let productsMap = {};
             snapshot.forEach(doc => {
-                products.push({ id: doc.id, ...doc.data() });
+                const data = doc.data();
+                const prodId = String(data.id || doc.id);
+                
+                if (productsMap[prodId]) {
+                    const existing = productsMap[prodId];
+                    if (doc.id === prodId) {
+                        console.warn("Deleting duplicate legacy document in Firestore:", existing.docId);
+                        db.collection('products').doc(existing.docId).delete().catch(err => console.error(err));
+                        productsMap[prodId] = { docId: doc.id, data: data };
+                    } else {
+                        console.warn("Deleting duplicate legacy document in Firestore:", doc.id);
+                        db.collection('products').doc(doc.id).delete().catch(err => console.error(err));
+                    }
+                } else {
+                    productsMap[prodId] = { docId: doc.id, data: data };
+                }
+            });
+            
+            let products = Object.keys(productsMap).map(prodId => {
+                return { id: prodId, ...productsMap[prodId].data };
             });
             
             // Seed defaults if collection is empty
             if (products.length === 0) {
                 console.log("Seeding Firestore with default products...");
                 for (const p of INITIAL_PRODUCTS) {
-                    const { id, ...data } = p;
-                    await db.collection('products').doc(String(id)).set(data);
+                    await db.collection('products').doc(String(p.id)).set(p);
                     products.push(p);
                 }
             }
@@ -757,12 +798,12 @@ async function saveProducts(products) {
         try {
             // Write each product to Firestore
             for (const p of products) {
-                const { id, ...data } = p;
-                await db.collection('products').doc(String(id)).set(data);
+                await db.collection('products').doc(String(p.id)).set(p);
             }
             console.log("Synced products list to Firestore.");
         } catch (e) {
             console.error("Failed to save products to Firestore:", e);
+            throw new Error("Firestore Database Write Failed: " + e.message + "\n\nPlease check your Firestore rules (e.g. they must allow unauthenticated writes or admin access).");
         }
     }
 }
@@ -779,6 +820,7 @@ async function deleteProduct(productId) {
             console.log(`Product ${productId} deleted from Firestore.`);
         } catch (e) {
             console.error("Failed to delete product from Firestore:", e);
+            throw new Error("Firestore Database Delete Failed: " + e.message);
         }
     }
 }
@@ -832,13 +874,14 @@ async function addToCart(productId, qty = 1) {
 
 function removeFromCart(productId) {
     let cart = getCart();
-    cart = cart.filter(item => item.id !== productId);
+    cart = cart.filter(item => String(item.id) !== String(productId));
     saveCart(cart);
 }
 
+// Update cart quantity
 function updateCartQty(productId, qty) {
     const cart = getCart();
-    const item = cart.find(item => item.id === productId);
+    const item = cart.find(item => String(item.id) === String(productId));
     if (item) {
         item.qty = parseInt(qty) || 1;
         if (item.qty <= 0) {
