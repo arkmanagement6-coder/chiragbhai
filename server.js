@@ -28,7 +28,13 @@ const server = http.createServer((req, res) => {
     }
     
     // Normalize path and solve index.html routing
-    let filePath = req.url === '/' ? './index.html' : '.' + req.url.split('?')[0];
+    let decodedUrl;
+    try {
+        decodedUrl = decodeURIComponent(req.url);
+    } catch (e) {
+        decodedUrl = req.url;
+    }
+    let filePath = decodedUrl === '/' ? './index.html' : '.' + decodedUrl.split('?')[0];
     filePath = path.resolve(__dirname, filePath);
     
     // Ensure the file is within the current directory to avoid directory traversal vulnerability

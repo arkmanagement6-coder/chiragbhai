@@ -702,13 +702,28 @@ async function getProducts() {
             const ipadIndex = products.findIndex(p => String(p.id) === '8270415000000');
             if (ipadIndex !== -1) {
                 const ipad = products[ipadIndex];
-                if (!ipad.description || (typeof ipad.image === 'string' && (ipad.image.includes('look-10287.myshopify.com') || ipad.image.includes('22_87148f00')))) {
+                if (!ipad.description || ipad.description.includes('cdn.shopify.com') || !ipad.description.includes('2.jpg') || (typeof ipad.image === 'string' && (ipad.image.includes('look-10287.myshopify.com') || ipad.image.includes('22_87148f00')))) {
                     console.log("Auto-updating iPad product 8270415000000 in Firestore to use local images and custom description...");
                     const updatedIpad = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000000');
                     if (updatedIpad) {
                         const { id, ...data } = updatedIpad;
                         await db.collection('products').doc(String(id)).set(data);
                         products[ipadIndex] = { id, ...data };
+                    }
+                }
+            }
+
+            // Auto-update Samsung product 8270415000005 if it's the old version in Firestore
+            const samsungIndex = products.findIndex(p => String(p.id) === '8270415000005');
+            if (samsungIndex !== -1) {
+                const samsung = products[samsungIndex];
+                if (!samsung.description || samsung.description.includes('cdn.shopify.com') || !samsung.description.includes('1.webp') || samsung.description.includes('1.webp alt=') || (typeof samsung.image === 'string' && samsung.image.includes('look-10287.myshopify.com'))) {
+                    console.log("Auto-updating Samsung product 8270415000005 in Firestore to use local images and custom description...");
+                    const updatedSamsung = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000005');
+                    if (updatedSamsung) {
+                        const { id, ...data } = updatedSamsung;
+                        await db.collection('products').doc(String(id)).set(data);
+                        products[samsungIndex] = { id, ...data };
                     }
                 }
             }
@@ -738,10 +753,23 @@ async function getProducts() {
     const ipadIndexLocal = products.findIndex(p => String(p.id) === '8270415000000');
     if (ipadIndexLocal !== -1) {
         const ipadLocal = products[ipadIndexLocal];
-        if (!ipadLocal.description || (typeof ipadLocal.image === 'string' && (ipadLocal.image.includes('look-10287.myshopify.com') || ipadLocal.image.includes('22_87148f00')))) {
+        if (!ipadLocal.description || ipadLocal.description.includes('cdn.shopify.com') || !ipadLocal.description.includes('2.jpg') || (typeof ipadLocal.image === 'string' && (ipadLocal.image.includes('look-10287.myshopify.com') || ipadLocal.image.includes('22_87148f00')))) {
             const updatedIpadLocal = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000000');
             if (updatedIpadLocal) {
                 products[ipadIndexLocal] = updatedIpadLocal;
+                updated = true;
+            }
+        }
+    }
+
+    // Auto-update Samsung product 8270415000005 in local storage if it's the old version
+    const samsungIndexLocal = products.findIndex(p => String(p.id) === '8270415000005');
+    if (samsungIndexLocal !== -1) {
+        const samsungLocal = products[samsungIndexLocal];
+        if (!samsungLocal.description || samsungLocal.description.includes('cdn.shopify.com') || !samsungLocal.description.includes('1.webp') || samsungLocal.description.includes('1.webp alt=') || (typeof samsungLocal.image === 'string' && samsungLocal.image.includes('look-10287.myshopify.com'))) {
+            const updatedSamsungLocal = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000005');
+            if (updatedSamsungLocal) {
+                products[samsungIndexLocal] = updatedSamsungLocal;
                 updated = true;
             }
         }
