@@ -34,6 +34,58 @@
         .admin-header .exit-link:hover {
             background-color: var(--accent);
         }
+
+        /* WYSIWYG Editor Toolbar Styles */
+        .wysiwyg-toolbar {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            background: #f1f5f9;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            align-items: center;
+        }
+        .wysiwyg-toolbar button {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.1s ease;
+        }
+        .wysiwyg-toolbar button:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .wysiwyg-toolbar select {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 3px 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #475569;
+        }
+        .has-toolbar {
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
+        }
+        .image-url-row, .desc-image-url-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -325,18 +377,87 @@
                             <button type="button" class="btn btn-secondary" onclick="addImageInputRow()" style="margin-top: 8px; width: 100%; border: 1px dashed var(--border-color); background-color: var(--bg-main);">+ Add Another Image</button>
                         </div>
                     </div>
+
+                    <!-- Description Feature Images Section -->
+                    <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Description Feature Images (Upload extra images for bottom of description)</label>
+                            <div id="desc-image-urls-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="addDescImageInputRow()" style="margin-top: 8px; width: 100%; border: 1px dashed var(--border-color); background-color: var(--bg-main);">+ Add Another Description Image</button>
+                        </div>
+                    </div>
                     
                     <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
                         <div class="form-group">
                             <label for="form-desc">Product Description *</label>
-                            <textarea id="form-desc" rows="4" required placeholder="Describe the product features, specs overview, warranty..."></textarea>
+                            <div class="wysiwyg-toolbar">
+                                <button type="button" onclick="insertAtCursor('form-desc', '<h1>', '</h1>')" title="Heading 1">H1</button>
+                                <button type="button" onclick="insertAtCursor('form-desc', '<h2>', '</h2>')" title="Heading 2">H2</button>
+                                <button type="button" onclick="insertAtCursor('form-desc', '<strong>', '</strong>')" style="font-weight:bold;" title="Bold">B</button>
+                                <button type="button" onclick="insertAtCursor('form-desc', '<em>', '</em>')" style="font-style:italic;" title="Italic">I</button>
+                                <button type="button" onclick="insertAtCursor('form-desc', '<u>', '</u>')" style="text-decoration:underline;" title="Underline">U</button>
+                                <select onchange="if(this.value) { insertAtCursor('form-desc', `<span style=&quot;font-family: ${this.value};&quot;>`, '</span>'); this.value = ''; }" title="Font Family">
+                                    <option value="">Font</option>
+                                    <option value="Outfit, sans-serif">Outfit</option>
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="Georgia, serif">Georgia</option>
+                                    <option value="Courier New, monospace">Monospace</option>
+                                </select>
+                                <select onchange="if(this.value) { insertAtCursor('form-desc', `<span style=&quot;font-size: ${this.value};&quot;>`, '</span>'); this.value = ''; }" title="Font Size">
+                                    <option value="">Size</option>
+                                    <option value="0.8rem">Small</option>
+                                    <option value="1rem">Normal</option>
+                                    <option value="1.25rem">Medium</option>
+                                    <option value="1.5rem">Large</option>
+                                    <option value="2rem">X-Large</option>
+                                </select>
+                                <select onchange="if(this.value) { insertAtCursor('form-desc', `<span style=&quot;color: ${this.value};&quot;>`, '</span>'); this.value = ''; }" title="Text Color">
+                                    <option value="">Color</option>
+                                    <option value="#0f172a">Dark Slate</option>
+                                    <option value="#dc2626">Red</option>
+                                    <option value="#2563eb">Blue</option>
+                                    <option value="#16a34a">Green</option>
+                                    <option value="#ea580c">Orange</option>
+                                    <option value="#4f46e5">Indigo</option>
+                                </select>
+                                <button type="button" onclick="insertAtCursor('form-desc', '<ul>\n  <li>', '</li>\n</ul>')" title="Bullet List">List</button>
+                                <button type="button" onclick="insertAtCursor('form-desc', '<table class=&quot;specs-table&quot; style=&quot;width:100%; border-collapse:collapse; margin: 15px 0;&quot;>\n  <tbody>\n    <tr>\n      <td style=&quot;border:1px solid #cbd5e1; padding:8px; font-weight:bold;&quot;>Label</td>\n      <td style=&quot;border:1px solid #cbd5e1; padding:8px;&quot;>Value</td>\n    </tr>\n  </tbody>\n</table>', '')" title="Table">Table</button>
+                            </div>
+                            <textarea id="form-desc" class="has-toolbar" rows="6" required placeholder="Describe the product features, specs overview, warranty..." style="border-radius: 0 0 4px 4px; border-top: none;"></textarea>
                         </div>
                     </div>
 
                     <div class="form-grid" style="grid-template-columns: 1fr; margin-top: 15px;">
                         <div class="form-group">
                             <label for="form-specs">Technical Specifications</label>
-                            <textarea id="form-specs" rows="3" placeholder="Enter one specification per line in format Name: Value, e.g.&#10;Processor: Apple M2 Chip&#10;Storage: 256GB ROM"></textarea>
+                            <div class="wysiwyg-toolbar">
+                                <button type="button" onclick="insertAtCursor('form-specs', '<strong>', '</strong>')" style="font-weight:bold;" title="Bold">B</button>
+                                <button type="button" onclick="insertAtCursor('form-specs', '<em>', '</em>')" style="font-style:italic;" title="Italic">I</button>
+                                <select onchange="if(this.value) { insertAtCursor('form-specs', `<span style=&quot;font-family: ${this.value};&quot;>`, '</span>'); this.value = ''; }" title="Font Family">
+                                    <option value="">Font</option>
+                                    <option value="Outfit, sans-serif">Outfit</option>
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="Georgia, serif">Georgia</option>
+                                    <option value="Courier New, monospace">Monospace</option>
+                                </select>
+                                <select onchange="if(this.value) { insertAtCursor('form-specs', `<span style=&quot;font-size: ${this.value};&quot;>`, '</span>'); this.value = ''; }" title="Font Size">
+                                    <option value="">Size</option>
+                                    <option value="0.8rem">Small</option>
+                                    <option value="1rem">Normal</option>
+                                    <option value="1.25rem">Medium</option>
+                                    <option value="1.5rem">Large</option>
+                                </select>
+                                <select onchange="if(this.value) { insertAtCursor('form-specs', `<span style=&quot;color: ${this.value};&quot;>`, '</span>'); this.value = ''; }" title="Text Color">
+                                    <option value="">Color</option>
+                                    <option value="#0f172a">Dark Slate</option>
+                                    <option value="#dc2626">Red</option>
+                                    <option value="#2563eb">Blue</option>
+                                    <option value="#16a34a">Green</option>
+                                </select>
+                            </div>
+                            <textarea id="form-specs" class="has-toolbar" rows="4" placeholder="Enter one specification per line in format Name: Value, e.g.&#10;Processor: Apple M2 Chip&#10;Storage: 256GB ROM" style="border-radius: 0 0 4px 4px; border-top: none;"></textarea>
                         </div>
                     </div>
 
@@ -685,6 +806,104 @@
             }
         }
 
+        // WYSIWYG insert at cursor position helper
+        function insertAtCursor(fieldId, beforeText, afterText = '') {
+            const textarea = document.getElementById(fieldId);
+            if (!textarea) return;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selected = text.substring(start, end);
+            const replacement = beforeText + selected + afterText;
+            textarea.value = text.substring(0, start) + replacement + text.substring(end);
+            textarea.focus();
+            
+            // Restore selection
+            const selectionOffset = start + beforeText.length;
+            textarea.setSelectionRange(selectionOffset, selectionOffset + selected.length);
+            // Trigger input event
+            textarea.dispatchEvent(new Event('input'));
+        }
+
+        // Dynamic description image input row builder
+        function addDescImageInputRow(url = '') {
+            const container = document.getElementById('desc-image-urls-container');
+            const row = document.createElement('div');
+            row.className = 'desc-image-url-row';
+            
+            // Check if it's an existing image url
+            const isExisting = url && (url.startsWith('http') || url.startsWith('Image/'));
+            
+            row.innerHTML = `
+                <div class="image-preview-thumbnail" style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--border-color); overflow: hidden; background-color: #f7fafc; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="${url}" style="width: 100%; height: 100%; object-fit: cover; ${url ? '' : 'display: none;'}">
+                    <span style="font-size: 1.2rem; ${url ? 'display: none;' : ''}">🖼️</span>
+                </div>
+                <input type="hidden" class="desc-image-data-value" value="${url}">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                    ${isExisting ? `
+                        <span class="existing-image-label" style="font-size: 0.8rem; color: var(--text-muted); word-break: break-all; max-height: 36px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Existing Image</span>
+                    ` : ''}
+                    <input type="file" class="image-file-input" accept="image/*" onchange="handleDescFileChange(this)" style="font-size: 0.85rem;">
+                </div>
+                <button type="button" class="btn-remove-row" onclick="this.closest('.desc-image-url-row').remove()">&times;</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function handleDescFileChange(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const rawImg = new Image();
+                rawImg.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 800; // max size for description layout images
+                    let width = rawImg.width;
+                    let height = rawImg.height;
+                    
+                    if (width > height) {
+                        if (width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        }
+                    } else {
+                        if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(rawImg, 0, 0, width, height);
+                    
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    const row = input.closest('.desc-image-url-row');
+                    const hiddenInput = row.querySelector('.desc-image-data-value');
+                    hiddenInput.value = compressedDataUrl;
+                    
+                    const imgPreview = row.querySelector('.image-preview-thumbnail img');
+                    const placeholder = row.querySelector('.image-preview-thumbnail span');
+                    
+                    imgPreview.src = compressedDataUrl;
+                    imgPreview.style.display = '';
+                    placeholder.style.display = 'none';
+
+                    const label = row.querySelector('.existing-image-label');
+                    if (label) {
+                        label.innerText = 'Uploaded: ' + file.name;
+                    }
+                };
+                rawImg.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         // Inventory Tab Renderer
         async function renderInventory() {
             const container = document.getElementById('admin-products-list');
@@ -723,6 +942,10 @@
             const container = document.getElementById('image-urls-container');
             container.innerHTML = '';
             addImageInputRow('');
+
+            // Clear description feature images container
+            const descContainer = document.getElementById('desc-image-urls-container');
+            descContainer.innerHTML = '';
 
             document.getElementById('product-modal-element').classList.add('active');
         }
@@ -768,6 +991,13 @@
                 addImageInputRow(product.image);
             } else {
                 addImageInputRow('');
+            }
+
+            // Populate description feature images container
+            const descContainer = document.getElementById('desc-image-urls-container');
+            descContainer.innerHTML = '';
+            if (product.descriptionImages && Array.isArray(product.descriptionImages) && product.descriptionImages.length > 0) {
+                product.descriptionImages.forEach(img => addDescImageInputRow(img));
             }
 
             document.getElementById('product-modal-element').classList.add('active');
@@ -823,6 +1053,16 @@
                 images.push(image);
             }
 
+            // Parse description feature images
+            const descImageDataInputs = document.querySelectorAll('.desc-image-data-value');
+            const descriptionImages = [];
+            descImageDataInputs.forEach(input => {
+                const val = input.value.trim();
+                if (val) {
+                    descriptionImages.push(val);
+                }
+            });
+
             const products = await getProducts();
             
             const price = 'Rs. ' + priceVal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
@@ -833,7 +1073,7 @@
                 .replace(/(^-|-$)/g, '');
 
             if (isEditing) {
-                const idx = products.findIndex(p => p.id === id);
+                const idx = products.findIndex(p => String(p.id) === String(id));
                 if (idx !== -1) {
                     products[idx] = {
                         ...products[idx],
@@ -848,7 +1088,8 @@
                         stockStatus,
                         description: desc,
                         paymentLink: paymentLink,
-                        specs: specs.length > 0 ? specs : undefined
+                        specs: specs.length > 0 ? specs : undefined,
+                        descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
                     };
                 }
             } else {
@@ -867,7 +1108,8 @@
                     stockStatus,
                     description: desc,
                     paymentLink: paymentLink,
-                    specs: specs.length > 0 ? specs : undefined
+                    specs: specs.length > 0 ? specs : undefined,
+                    descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
                 });
             }
 

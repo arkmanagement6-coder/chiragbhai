@@ -312,9 +312,16 @@
 
                     <div class="pdp-description">
                         ${descriptionHtml}
+                        ${selectedProduct.descriptionImages && Array.isArray(selectedProduct.descriptionImages) ? `
+                            <div class="pdp-desc-extra-images" style="margin-top: 25px; display: flex; flex-direction: column; gap: 20px;">
+                                ${selectedProduct.descriptionImages.map(img => `
+                                    <img src="${img}" alt="Feature Detail" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                `).join('')}
+                            </div>
+                        ` : ''}
                     </div>
 
-                    ${selectedProduct.description ? '' : `
+                    ${specs && specs.length > 0 ? `
                     <div style="margin-top: 40px;">
                         <h3 class="pdp-specs-title">Technical Specifications</h3>
                         <table class="specs-table">
@@ -323,7 +330,7 @@
                             </tbody>
                         </table>
                     </div>
-                    `}
+                    ` : ''}
                 </div>
             `;
 
