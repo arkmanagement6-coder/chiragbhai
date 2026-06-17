@@ -1010,75 +1010,98 @@
         async function handleSaveProduct(e) {
             e.preventDefault();
 
-            const id = document.getElementById('form-product-id').value;
-            const title = document.getElementById('form-title').value.trim();
-            const priceVal = parseFloat(document.getElementById('form-price').value);
-            const compareVal = parseFloat(document.getElementById('form-compare').value);
-            const category = document.getElementById('form-category').value;
-            const badge = document.getElementById('form-badge').value.trim();
-            const stockStatus = document.getElementById('form-stock').value;
-            const desc = document.getElementById('form-desc').value.trim();
-            const paymentLink = document.getElementById('form-payment-link').value.trim() || 'https://razorpay.me/@luckydigitalmedia';
+            try {
+                const id = document.getElementById('form-product-id').value;
+                const title = document.getElementById('form-title').value.trim();
+                const priceVal = parseFloat(document.getElementById('form-price').value);
+                const compareVal = parseFloat(document.getElementById('form-compare').value);
+                const category = document.getElementById('form-category').value;
+                const badge = document.getElementById('form-badge').value.trim();
+                const stockStatus = document.getElementById('form-stock').value;
+                const desc = document.getElementById('form-desc').value.trim();
+                const paymentLink = document.getElementById('form-payment-link').value.trim() || 'https://razorpay.me/@luckydigitalmedia';
 
-            // Parse specifications
-            const specsText = document.getElementById('form-specs').value.trim();
-            const specs = [];
-            if (specsText) {
-                const lines = specsText.split('\n');
-                lines.forEach(line => {
-                    const colonIndex = line.indexOf(':');
-                    if (colonIndex !== -1) {
-                        const name = line.substring(0, colonIndex).trim();
-                        const value = line.substring(colonIndex + 1).trim();
-                        if (name && value) {
-                            specs.push({ name, value });
+                // Parse specifications
+                const specsText = document.getElementById('form-specs').value.trim();
+                const specs = [];
+                if (specsText) {
+                    const lines = specsText.split('\n');
+                    lines.forEach(line => {
+                        const colonIndex = line.indexOf(':');
+                        if (colonIndex !== -1) {
+                            const name = line.substring(0, colonIndex).trim();
+                            const value = line.substring(colonIndex + 1).trim();
+                            if (name && value) {
+                                specs.push({ name, value });
+                            }
                         }
+                    });
+                }
+
+                // Parse images
+                const imageDataInputs = document.querySelectorAll('.image-data-value');
+                const images = [];
+                imageDataInputs.forEach(input => {
+                    const val = input.value.trim();
+                    if (val) {
+                        images.push(val);
                     }
                 });
-            }
 
-            // Parse images
-            const imageDataInputs = document.querySelectorAll('.image-data-value');
-            const images = [];
-            imageDataInputs.forEach(input => {
-                const val = input.value.trim();
-                if (val) {
-                    images.push(val);
+                // Fallback image
+                const image = images.length > 0 ? images[0] : 'https://look-10287.myshopify.com/cdn/shop/files/22_87148f00-12f9-4e5e-9951-8717bdcb21de_512x512.jpg?v=1781259482';
+                if (images.length === 0) {
+                    images.push(image);
                 }
-            });
 
-            // Fallback image
-            const image = images.length > 0 ? images[0] : 'https://look-10287.myshopify.com/cdn/shop/files/22_87148f00-12f9-4e5e-9951-8717bdcb21de_512x512.jpg?v=1781259482';
-            if (images.length === 0) {
-                images.push(image);
-            }
+                // Parse description feature images
+                const descImageDataInputs = document.querySelectorAll('.desc-image-data-value');
+                const descriptionImages = [];
+                descImageDataInputs.forEach(input => {
+                    const val = input.value.trim();
+                    if (val) {
+                        descriptionImages.push(val);
+                    }
+                });
 
-            // Parse description feature images
-            const descImageDataInputs = document.querySelectorAll('.desc-image-data-value');
-            const descriptionImages = [];
-            descImageDataInputs.forEach(input => {
-                const val = input.value.trim();
-                if (val) {
-                    descriptionImages.push(val);
-                }
-            });
+                const products = await getProducts();
+                
+                const price = 'Rs. ' + priceVal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                const comparePrice = compareVal ? 'Rs. ' + compareVal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : 'Rs. ' + (priceVal * 1.5).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
-            const products = await getProducts();
-            
-            const price = 'Rs. ' + priceVal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-            const comparePrice = compareVal ? 'Rs. ' + compareVal.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : 'Rs. ' + (priceVal * 1.5).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                const handle = title.toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
 
-            const handle = title.toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '');
-
-            if (isEditing) {
-                const idx = products.findIndex(p => String(p.id) === String(id));
-                if (idx !== -1) {
-                    products[idx] = {
-                        ...products[idx],
+                if (isEditing) {
+                    const idx = products.findIndex(p => String(p.id) === String(id));
+                    if (idx !== -1) {
+                        products[idx] = {
+                            ...products[idx],
+                            title,
+                            handle,
+                            price,
+                            comparePrice,
+                            image,
+                            images,
+                            category,
+                            badge,
+                            stockStatus,
+                            description: desc,
+                            paymentLink: paymentLink,
+                            specs: specs.length > 0 ? specs : undefined,
+                            descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
+                        };
+                    } else {
+                        throw new Error("Product with ID " + id + " was not found in the inventory.");
+                    }
+                } else {
+                    const newId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
+                    products.push({
+                        id: newId,
                         title,
                         handle,
+                        url: `/products/${handle}`,
                         price,
                         comparePrice,
                         image,
@@ -1090,32 +1113,17 @@
                         paymentLink: paymentLink,
                         specs: specs.length > 0 ? specs : undefined,
                         descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
-                    };
+                    });
                 }
-            } else {
-                const newId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
-                products.push({
-                    id: newId,
-                    title,
-                    handle,
-                    url: `/products/${handle}`,
-                    price,
-                    comparePrice,
-                    image,
-                    images,
-                    category,
-                    badge,
-                    stockStatus,
-                    description: desc,
-                    paymentLink: paymentLink,
-                    specs: specs.length > 0 ? specs : undefined,
-                    descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
-                });
-            }
 
-            await saveProducts(products);
-            closeProductModal();
-            await renderInventory();
+                await saveProducts(products);
+                closeProductModal();
+                await renderInventory();
+                alert("Product saved and synced successfully!");
+            } catch (err) {
+                console.error("Save product failed:", err);
+                alert("Error: " + err.message);
+            }
         }
 
         async function handleDeleteProduct(productId) {
