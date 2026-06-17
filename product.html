@@ -349,10 +349,24 @@
             const products = await getProducts();
             const category = getProductCategory(selectedProduct);
             
-            // Filter products of same category, excluding current product
-            const related = products
-                .filter(p => getProductCategory(p) === category && p.id !== selectedProduct.id)
-                .slice(0, 4);
+            // Filter out out-of-stock products and the current product
+            const availableProducts = products.filter(p => p.id !== selectedProduct.id && p.stockStatus !== 'out-of-stock');
+            
+            // Try to find products of the same category first
+            let related = availableProducts.filter(p => getProductCategory(p) === category);
+            
+            // Fallback: If less than 4 related products, pad with other available products
+            if (related.length < 4) {
+                const otherProducts = availableProducts.filter(p => getProductCategory(p) !== category);
+                related = related.concat(otherProducts).slice(0, 4);
+            } else {
+                related = related.slice(0, 4);
+            }
+
+            if (related.length === 0) {
+                grid.innerHTML = '<div class="no-products-msg" style="grid-column: span 4; text-align: center; padding: 40px; color: var(--text-muted);">No related products available at the moment.</div>';
+                return;
+            }
 
             grid.innerHTML = related.map(p => {
                 const priceNum = parsePrice(p.price) || 999;
@@ -360,17 +374,13 @@
                 const percentSaved = Math.round(((compareNum - priceNum) / compareNum) * 100);
 
                 let badgeHtml = '';
-                if (p.stockStatus === 'out-of-stock') {
-                    badgeHtml = `<span class="card-badge-soldout">Sold Out</span>`;
-                } else if (p.badge) {
+                if (p.badge) {
                     badgeHtml = `<span class="card-badge-sale">${p.badge}</span>`;
                 } else {
                     badgeHtml = `<span class="card-badge-sale">Save ${percentSaved}%</span>`;
                 }
 
-                const buttonHtml = p.stockStatus === 'out-of-stock'
-                    ? `<button class="add-to-cart-btn" disabled>Sold Out</button>`
-                    : `<button class="add-to-cart-btn" onclick="addToCart('${p.id}')">Add to Cart</button>`;
+                const buttonHtml = `<button class="add-to-cart-btn" onclick="addToCart('${p.id}')">Add to Cart</button>`;
 
                 return `
                     <article class="product-card" id="card-${p.id}">
