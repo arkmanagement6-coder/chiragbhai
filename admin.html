@@ -1099,7 +1099,7 @@
                             descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
                         };
                     } else {
-                        throw new Error("Product with ID " + id + " was not found in the inventory.");
+                        throw new Error("Product with ID " + id + " was not found in the inventory. Available: " + JSON.stringify(products.map(p => ({ id: p.id, type: typeof p.id }))));
                     }
                 } else {
                     const newId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
