@@ -969,6 +969,14 @@ button, input, select, textarea {
 .pdp-description p {
     margin-bottom: 15px;
 }
+.pdp-description img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
 /* --- Rich Product Details Page Description Styles --- */
 .rich-pdp-description {
