@@ -851,18 +851,20 @@ button, input, select, textarea {
 }
 .pdp-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 50px;
     background-color: white;
     padding: 40px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
+    max-width: 100%;
 }
 .pdp-images {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
 }
 .pdp-main-image {
     width: 100%;
@@ -913,6 +915,7 @@ button, input, select, textarea {
 .pdp-info {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 .pdp-title {
     font-family: var(--font-heading);
@@ -920,6 +923,9 @@ button, input, select, textarea {
     font-weight: 700;
     line-height: 1.3;
     margin-bottom: 15px;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 .pdp-reviews {
     display: flex;
@@ -938,6 +944,7 @@ button, input, select, textarea {
 .pdp-prices {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 15px;
     margin-bottom: 25px;
     border-bottom: 1px solid var(--border-color);
@@ -965,6 +972,15 @@ button, input, select, textarea {
     font-size: 0.95rem;
     color: #4a5568;
     margin-bottom: 30px;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+.pdp-description table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
 }
 .pdp-description p {
     margin-bottom: 15px;
@@ -1138,6 +1154,7 @@ button, input, select, textarea {
 .trust-badges {
     display: flex;
     justify-content: space-around;
+    flex-wrap: wrap;
     gap: 15px;
     border-top: 1px solid var(--border-color);
     padding-top: 20px;
@@ -1910,7 +1927,7 @@ button, input, select, textarea {
         font-size: 2.2rem;
     }
     .pdp-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         padding: 20px;
         gap: 30px;
         max-width: 100%;
