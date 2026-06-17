@@ -574,12 +574,25 @@ window.settingsLoadingPromise = loadGlobalSettings();
 
 async function loadGlobalSettings() {
     try {
-        const res = await fetch('/settings.json');
+        const res = await fetch('/settings.json?v=' + Date.now());
         if (res.ok) {
             const globalSettings = await res.json();
             const localSettings = JSON.parse(localStorage.getItem('ikko_settings')) || {};
-            // Merge settings: local overrides take precedence for admin convenience
-            const mergedSettings = { ...globalSettings, ...localSettings };
+            
+            // Merge settings: local overrides take precedence for admin convenience,
+            // but empty local settings must NOT overwrite valid global settings.
+            const mergedSettings = { ...globalSettings };
+            for (const key in localSettings) {
+                const localVal = localSettings[key];
+                if (localVal !== undefined && localVal !== null && localVal !== '') {
+                    // Skip empty object configurations
+                    if (key === 'firebaseConfig' && typeof localVal === 'object' && Object.keys(localVal).length === 0) {
+                        continue;
+                    }
+                    mergedSettings[key] = localVal;
+                }
+            }
+            
             localStorage.setItem('ikko_settings', JSON.stringify(mergedSettings));
             console.log("Global settings loaded and merged successfully.");
         }
