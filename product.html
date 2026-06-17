@@ -291,6 +291,7 @@
                         ${descriptionHtml}
                     </div>
 
+                    ${selectedProduct.description ? '' : `
                     <div style="margin-top: 40px;">
                         <h3 class="pdp-specs-title">Technical Specifications</h3>
                         <table class="specs-table">
@@ -299,6 +300,7 @@
                             </tbody>
                         </table>
                     </div>
+                    `}
                 </div>
             `;
 
