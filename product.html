@@ -249,10 +249,6 @@
                         ${selectedProduct.stockStatus === 'out-of-stock' ? `<span class="pdp-badge-soldout">Sold Out</span>` : ''}
                     </div>
 
-                    <div class="pdp-description">
-                        ${descriptionHtml}
-                    </div>
-
                     <div class="pdp-actions-card">
                         <div class="pdp-actions-row">
                             <span class="pdp-qty-label">Quantity:</span>
@@ -281,6 +277,10 @@
                             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
                             <span>7-Day Returns</span>
                         </div>
+                    </div>
+
+                    <div class="pdp-description">
+                        ${descriptionHtml}
                     </div>
 
                     <div style="margin-top: 40px;">
