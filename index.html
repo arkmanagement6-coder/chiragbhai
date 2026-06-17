@@ -24,6 +24,7 @@
     <div class="tabs-container" id="store-listings">
         <button class="tab-btn active" id="tab-all" onclick="filterTab('all')">All Products</button>
         <button class="tab-btn" id="tab-tablets" onclick="filterTab('tablets')">iPads & Tablets</button>
+        <button class="tab-btn" id="tab-smart-phone" onclick="filterTab('smart-phone')">Smart Phones</button>
         <button class="tab-btn" id="tab-audio" onclick="filterTab('audio')">Audio & Earbuds</button>
     </div>
 
@@ -71,6 +72,7 @@
             if (category === 'all') document.getElementById('tab-all').classList.add('active');
             if (category === 'tablets') document.getElementById('tab-tablets').classList.add('active');
             if (category === 'audio') document.getElementById('tab-audio').classList.add('active');
+            if (category === 'smart-phone') document.getElementById('tab-smart-phone').classList.add('active');
 
             renderStorefront();
         }
@@ -141,11 +143,14 @@
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const tab = urlParams.get('tab');
-            if (tab && ['all', 'tablets', 'audio'].includes(tab)) {
+            if (tab && ['all', 'tablets', 'audio', 'smart-phone'].includes(tab)) {
                 filterTab(tab);
             } else {
                 renderStorefront();
             }
+        });
+        window.addEventListener('products-synced', () => {
+            renderStorefront();
         });
     </script>
 </body>

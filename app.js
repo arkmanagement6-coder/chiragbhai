@@ -275,7 +275,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "8270415000009",
-    "title": "Apple iPad Air 11″ (M2): Liquid Retina Display, 256GB, Landscape 12MP Front Camera / 12MP Back Camera, Wi-Fi 6E, Touch ID, All-Day Battery Life-Blue",
+    "title": "Boult Audio UFO Truly Wireless In-Ear Earbuds with 48H Playtime, Built-in App Support, 45ms Low Latency Gaming, 4 Mics ENC, Breathing LEDs, 13mm Bass Drivers, Ear Buds TWS, Made in India",
     "handle": "boult-audio-ufo-truly-wireless-in-ear-earbuds-with-48h-playtime-built-in-app-support-45ms-low-latency-gaming-4-mics-enc-breathing-leds-13mm-bass-drivers-ear-buds-tws-made-in-india",
     "url": "/products/boult-audio-ufo-truly-wireless-in-ear-earbuds-with-48h-playtime-built-in-app-support-45ms-low-latency-gaming-4-mics-enc-breathing-leds-13mm-bass-drivers-ear-buds-tws-made-in-india",
     "price": "Rs. 999.00",
@@ -417,7 +417,7 @@ const INITIAL_PRODUCTS = [
   },
   {
     "id": "8270415000021",
-    "title": "Apple iPad Air 11″ (M2): Liquid Retina Display, 256GB, Landscape 12MP Front Camera / 12MP Back Camera, Wi-Fi 6E, Touch ID, All-Day Battery Life-Blue",
+    "title": "Boult Audio UFO Truly Wireless In-Ear Earbuds with 48H Playtime, Built-in App Support, 45ms Low Latency Gaming, 4 Mics ENC, Breathing LEDs, 13mm Bass Drivers, Ear Buds TWS, Made in India",
     "handle": "boult-audio-ufo-truly-wireless-in-ear-earbuds-with-48h-playtime-built-in-app-support-45ms-low-latency-gaming-4-mics-enc-breathing-leds-13mm-bass-drivers-ear-buds-tws-made-in-india",
     "url": "/products/boult-audio-ufo-truly-wireless-in-ear-earbuds-with-48h-playtime-built-in-app-support-45ms-low-latency-gaming-4-mics-enc-breathing-leds-13mm-bass-drivers-ear-buds-tws-made-in-india",
     "price": "Rs. 999.00",
@@ -815,6 +815,10 @@ async function syncProductsBackground() {
                 p.paymentLink = 'https://razorpay.me/@luckydigitalmedia';
                 updated = true;
             }
+            if ((String(p.id) === '8270415000009' || String(p.id) === '8270415000021') && p.title.includes('iPad')) {
+                p.title = "Boult Audio UFO Truly Wireless In-Ear Earbuds with 48H Playtime, Built-in App Support, 45ms Low Latency Gaming, 4 Mics ENC, Breathing LEDs, 13mm Bass Drivers, Ear Buds TWS, Made in India";
+                updated = true;
+            }
             return p;
         });
         if (updated) {
@@ -1022,10 +1026,10 @@ function renderHeader() {
         <nav class="lower-nav">
             <div class="lower-nav-container">
                 <a href="index.html" class="nav-item">HOME</a>
-                <a href="collections.html?type=all" class="nav-item">CATALOG</a>
                 <a href="collections.html?type=all" class="nav-item">SHOP ALL</a>
                 <a href="collections.html?type=tablets" class="nav-item">TABLETS</a>
                 <a href="collections.html?type=smart-phone" class="nav-item">SMART PHONE</a>
+                <a href="collections.html?type=audio" class="nav-item">AUDIO & EARBUDS</a>
                 <a href="account.html" class="nav-item">${accountText}</a>
             </div>
         </nav>
