@@ -8,5 +8,13 @@
   "upiId": "sabpaisa.lucky06@hdfcbank",
   "merchantName": "JARVIS AI",
   "firebaseEnabled": true,
-  "firebaseConfig": ""
+  "firebaseConfig": {
+    "apiKey": "AIzaSyAJTk4iJzlmFsrzAQrm-iqpXnS5iykQqsU",
+    "authDomain": "ikko-digital.firebaseapp.com",
+    "projectId": "ikko-digital",
+    "storageBucket": "ikko-digital.firebasestorage.app",
+    "messagingSenderId": "147824541932",
+    "appId": "1:147824541932:web:3a4ba1344e84391757e5c9",
+    "measurementId": "G-8JN34Y14V4"
+  }
 }
