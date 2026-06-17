@@ -428,7 +428,11 @@
                 try {
                     firebaseConfig = JSON.parse(firebaseConfig);
                 } catch (err) {
-                    alert('Warning: Firebase configuration is not valid JSON. Storing as raw text.');
+                    try {
+                        firebaseConfig = Function("return (" + firebaseConfig + ")")();
+                    } catch (err2) {
+                        alert('Warning: Firebase configuration is not valid JSON or JavaScript object. Storing as raw text.');
+                    }
                 }
             }
 

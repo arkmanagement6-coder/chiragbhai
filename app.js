@@ -489,7 +489,16 @@ async function initFirebase() {
     try {
         let config;
         if (typeof settings.firebaseConfig === 'string') {
-            config = JSON.parse(settings.firebaseConfig);
+            try {
+                config = JSON.parse(settings.firebaseConfig);
+            } catch (err) {
+                try {
+                    config = Function("return (" + settings.firebaseConfig + ")")();
+                } catch (err2) {
+                    console.error("Failed to parse Firebase config:", err2);
+                    return null;
+                }
+            }
         } else {
             config = settings.firebaseConfig;
         }
