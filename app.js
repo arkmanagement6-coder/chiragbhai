@@ -234,108 +234,6 @@ const INITIAL_PRODUCTS = [
         }
     ]
 },
-        {
-            "name": "Manufacturer",
-            "value": "Samsung, Dixon Technologies (India) Ltd., Plot no.6, Sector 90, Noida, Gautam Buddha Nagar, U.P. India – 201305"
-        },
-        {
-            "name": "Series",
-            "value": "Samsung Galaxy Tab S10+"
-        },
-        {
-            "name": "Colour",
-            "value": "Gray | WiFi"
-        },
-        {
-            "name": "Standing screen display size",
-            "value": "12.4 Inches"
-        },
-        {
-            "name": "Resolution",
-            "value": "2800 x 1752 Pixels"
-        },
-        {
-            "name": "Package Dimensions",
-            "value": "30.2 x 20.3 x 2.1 cm; 571 g"
-        },
-        {
-            "name": "Batteries",
-            "value": "1 Lithium Ion batteries required. (included)"
-        },
-        {
-            "name": "Item model number",
-            "value": "SM-X820"
-        },
-        {
-            "name": "Processor Brand",
-            "value": "MediaTek"
-        },
-        {
-            "name": "Processor Speed",
-            "value": "2 GHz"
-        },
-        {
-            "name": "Speaker Description",
-            "value": "Dolby Speakers"
-        },
-        {
-            "name": "Graphics Chipset Brand",
-            "value": "Samsung"
-        },
-        {
-            "name": "Graphics Card Description",
-            "value": "Integrated"
-        },
-        {
-            "name": "Connectivity Type",
-            "value": "Wi-Fi"
-        },
-        {
-            "name": "Wireless Carrier",
-            "value": "Unlocked for All Carriers"
-        },
-        {
-            "name": "Rear Webcam Resolution",
-            "value": "13 MP"
-        },
-        {
-            "name": "Front Webcam Resolution",
-            "value": "12 MP"
-        },
-        {
-            "name": "Operating System",
-            "value": "Android 14"
-        },
-        {
-            "name": "Are Batteries Included",
-            "value": "Yes"
-        },
-        {
-            "name": "Lithium Battery Energy Content",
-            "value": "42.21 Watt Hours"
-        },
-        {
-            "name": "Number of Lithium Ion Cells",
-            "value": "1"
-        },
-        {
-            "name": "Included Components",
-            "value": "USB Type C Cable, Tablet, S Pen, Ejection PIN, Quick Start Guide"
-        },
-        {
-            "name": "Manufacturer",
-            "value": "Samsung"
-        },
-        {
-            "name": "Country of Origin",
-            "value": "India"
-        },
-        {
-            "name": "Item Weight",
-            "value": "571 g"
-        }
-    ]
-},
   {
     "id": "8270415000006",
     "title": "Apple iPad Air (5th gen) 256 GB ROM 10.9 Inch with Wi-Fi+5G",
@@ -815,21 +713,6 @@ async function getProducts() {
                 }
             }
             
-            // Auto-update Samsung product 8270415000005 in Firestore to use local images and custom description
-            const samsungIndex = products.findIndex(p => String(p.id) === '8270415000005');
-            if (samsungIndex !== -1) {
-                const samsung = products[samsungIndex];
-                if (!samsung.description || (typeof samsung.image === 'string' && samsung.image.includes('look-10287.myshopify.com'))) {
-                    console.log("Auto-updating Samsung product 8270415000005 in Firestore to use local images and custom description...");
-                    const updatedSamsung = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000005');
-                    if (updatedSamsung) {
-                        const { id, ...data } = updatedSamsung;
-                        await db.collection('products').doc(String(id)).set(data);
-                        products[samsungIndex] = { id, ...data };
-                    }
-                }
-            }
-            
             // Seed defaults if collection is empty
             if (products.length === 0) {
                 console.log("Seeding Firestore with default products...");
@@ -859,19 +742,6 @@ async function getProducts() {
             const updatedIpadLocal = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000000');
             if (updatedIpadLocal) {
                 products[ipadIndexLocal] = updatedIpadLocal;
-                updated = true;
-            }
-        }
-    }
-    
-    // Auto-update Samsung product 8270415000005 in local storage if it's the old version
-    const samsungIndexLocal = products.findIndex(p => String(p.id) === '8270415000005');
-    if (samsungIndexLocal !== -1) {
-        const samsungLocal = products[samsungIndexLocal];
-        if (!samsungLocal.description || (typeof samsungLocal.image === 'string' && samsungLocal.image.includes('look-10287.myshopify.com'))) {
-            const updatedSamsungLocal = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000005');
-            if (updatedSamsungLocal) {
-                products[samsungIndexLocal] = updatedSamsungLocal;
                 updated = true;
             }
         }
