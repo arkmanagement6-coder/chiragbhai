@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store Administrator Panel | IKKO DIGITAL</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2.2">
     <style>
         /* Specific layout overrides for Admin Panel */
         body {
@@ -483,7 +483,7 @@
     </div>
 
     <!-- Core Scripts -->
-    <script src="app.js?v=2.1"></script>
+    <script src="app.js?v=2.2"></script>
     <script>
         let currentAdminTab = 'dash';
         let isEditing = false;
@@ -536,7 +536,7 @@
             document.getElementById('setting-firebase-config').value = configStr;
         }
 
-        function handleSaveSettings(e) {
+        async function handleSaveSettings(e) {
             e.preventDefault();
             
             const sabpaisaEnabled = document.getElementById('setting-sabpaisa-enabled').checked;
@@ -563,7 +563,7 @@
                 }
             }
 
-            saveSettings({
+            await saveSettings({
                 sabpaisaEnabled,
                 sabpaisaClientCode,
                 sabpaisaApiKey,
@@ -1153,6 +1153,11 @@
         // Load dashboard stats automatically
         window.addEventListener('load', async () => {
             await renderDashboard();
+        });
+
+        // Listen for Firestore background product sync and refresh inventory view
+        window.addEventListener('products-synced', () => {
+            renderInventory();
         });
     </script>
 </body>

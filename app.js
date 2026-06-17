@@ -689,11 +689,34 @@ async function loadGlobalSettings() {
                     if (key === 'firebaseConfig' && typeof localVal === 'object' && Object.keys(localVal).length === 0) {
                         continue;
                     }
+                    // Crucial fix: Do not allow local overrides to turn off Firebase if it is enabled globally
+                    if (key === 'firebaseEnabled' && globalSettings.firebaseEnabled) {
+                        continue;
+                    }
                     mergedSettings[key] = localVal;
                 }
             }
             
             localStorage.setItem('ikko_settings', JSON.stringify(mergedSettings));
+            
+            // If Firebase is enabled, dynamically sync settings document from Firestore (deadlock-free)
+            if (mergedSettings.firebaseEnabled && mergedSettings.firebaseConfig) {
+                const dbPromise = initFirebaseWithSettings(mergedSettings);
+                const db = dbPromise ? await dbPromise : null;
+                if (db) {
+                    try {
+                        const doc = await db.collection('settings').doc('global').get();
+                        if (doc.exists) {
+                            const firestoreSettings = doc.data();
+                            const finalSettings = { ...mergedSettings, ...firestoreSettings };
+                            localStorage.setItem('ikko_settings', JSON.stringify(finalSettings));
+                            console.log("Loaded dynamic settings from Firestore successfully.");
+                        }
+                    } catch (err) {
+                        console.error("Failed to fetch settings from Firestore:", err);
+                    }
+                }
+            }
             console.log("Global settings loaded and merged successfully.");
         }
     } catch (e) {
@@ -743,24 +766,30 @@ function getSettings() {
     return settings;
 }
 
-function saveSettings(settings) {
+async function saveSettings(settings) {
     localStorage.setItem('ikko_settings', JSON.stringify(settings));
+    
+    // Also save settings to Firestore to synchronize dynamically across all client devices
+    const db = await initFirebase();
+    if (db) {
+        try {
+            await db.collection('settings').doc('global').set(cleanUndefinedFields(settings));
+            console.log("Settings synced to Firestore successfully.");
+        } catch (e) {
+            console.error("Failed to save settings to Firestore:", e);
+        }
+    }
 }
 
 // Firebase Dynamic Loader & Global Instance State
 let firebaseDB = null;
 let firebaseInitialized = false;
 
-async function initFirebase() {
+// Deadlock-free Firebase initializer that does not await global settings promise
+function initFirebaseWithSettings(settings) {
     if (firebaseInitialized) return firebaseDB;
-
-    if (window.settingsLoadingPromise) {
-        await window.settingsLoadingPromise;
-    }
-
-    const settings = getSettings();
-    if (!settings.firebaseEnabled || !settings.firebaseConfig) {
-        return null; // Fallback to localStorage
+    if (!settings || !settings.firebaseEnabled || !settings.firebaseConfig) {
+        return null;
     }
 
     try {
@@ -800,25 +829,40 @@ async function initFirebase() {
         };
 
         // Load compatibility packages to avoid ESM refactoring overhead
-        await loadScript("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
-        await loadScript("https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js");
+        return (async () => {
+            await loadScript("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
+            await loadScript("https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js");
 
-        if (window.firebase) {
-            let app;
-            if (!window.firebase.apps.length) {
-                app = window.firebase.initializeApp(config);
-            } else {
-                app = window.firebase.app();
+            if (window.firebase) {
+                let app;
+                if (!window.firebase.apps.length) {
+                    app = window.firebase.initializeApp(config);
+                } else {
+                    app = window.firebase.app();
+                }
+                firebaseDB = window.firebase.firestore(app);
+                firebaseInitialized = true;
+                console.log("🔥 Firebase Firestore connected successfully!");
+                return firebaseDB;
             }
-            firebaseDB = window.firebase.firestore(app);
-            firebaseInitialized = true;
-            console.log("🔥 Firebase Firestore connected successfully!");
-            return firebaseDB;
-        }
+            return null;
+        })();
     } catch (e) {
         console.error("Error initializing Firebase:", e);
     }
     return null;
+}
+
+async function initFirebase() {
+    if (firebaseInitialized) return firebaseDB;
+
+    if (window.settingsLoadingPromise) {
+        await window.settingsLoadingPromise;
+    }
+
+    const settings = getSettings();
+    const dbPromise = initFirebaseWithSettings(settings);
+    return dbPromise ? await dbPromise : null;
 }
 
 // Helper to clean undefined fields before saving to Firestore
