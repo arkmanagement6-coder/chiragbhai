@@ -326,6 +326,21 @@
                 return;
             }
             
+            // Save customer details to localStorage for future checkout convenience
+            try {
+                const customerDetails = {
+                    name,
+                    phone,
+                    address,
+                    city,
+                    state,
+                    pin
+                };
+                localStorage.setItem('ikko_customer', JSON.stringify(customerDetails));
+            } catch (e) {
+                console.error("Error saving ikko_customer to localStorage:", e);
+            }
+            
             showWizardStep(2);
         }
 
@@ -582,16 +597,16 @@
             // Render the checkout summary on load so the "Order Items" block is populated on Step 1
             renderCheckoutSummary();
             
-            // Auto-fill customer info if logged in
+            // Auto-fill customer info if previously entered
             try {
                 const customer = JSON.parse(localStorage.getItem('ikko_customer'));
                 if (customer) {
-                    if (customer.name) {
-                        document.getElementById('cust-name').value = customer.name;
-                    }
-                    if (customer.phone) {
-                        document.getElementById('cust-phone').value = customer.phone;
-                    }
+                    if (customer.name) document.getElementById('cust-name').value = customer.name;
+                    if (customer.phone) document.getElementById('cust-phone').value = customer.phone;
+                    if (customer.address) document.getElementById('cust-address').value = customer.address;
+                    if (customer.city) document.getElementById('cust-city').value = customer.city;
+                    if (customer.state) document.getElementById('cust-state').value = customer.state;
+                    if (customer.pin) document.getElementById('cust-pin').value = customer.pin;
                 }
             } catch (e) {
                 console.error("Error reading ikko_customer from localStorage:", e);

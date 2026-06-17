@@ -17,8 +17,7 @@
     fbq('init', pixelId);
     fbq('track', 'PageView');
     
-    // Add pixel image fallback for browsers with JS disabled/blocked
-    window.addEventListener('DOMContentLoaded', () => {
+    const runTracking = () => {
         const noscript = document.createElement('noscript');
         const img = document.createElement('img');
         img.height = 1;
@@ -32,12 +31,12 @@
         const path = window.location.pathname.toLowerCase();
         
         // Track Checkout Page (InitiateCheckout)
-        if (path.includes('checkout.html')) {
+        if (path.includes('checkout.html') || path.endsWith('/checkout') || path.includes('/checkout?')) {
             fbq('track', 'InitiateCheckout');
         }
         
         // Track Purchase Page (Purchase)
-        if (path.includes('order-confirmation.html')) {
+        if (path.includes('order-confirmation.html') || path.endsWith('/order-confirmation') || path.includes('/order-confirmation?')) {
             const urlParams = new URLSearchParams(window.location.search);
             let orderId = urlParams.get('orderId') || urlParams.get('client_txn_id') || urlParams.get('merchant_txn_id');
             let status = urlParams.get('status');
@@ -52,7 +51,7 @@
             }
             
             const isSuccess = (status === 'success' || status === 'successful') || 
-                              (order && order.status !== 'cancelled' && order.utr !== 'Payment Failed');
+                               (order && order.status !== 'cancelled' && order.utr !== 'Payment Failed');
             
             if (order && isSuccess) {
                 let totalVal = 999;
@@ -71,7 +70,7 @@
         }
         
         // Track Product Page (ViewContent)
-        if (path.includes('product.html')) {
+        if (path.includes('product.html') || path.endsWith('/product') || path.includes('/product?')) {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
             const products = JSON.parse(localStorage.getItem('ikko_products')) || [];
@@ -92,7 +91,13 @@
                 });
             }
         }
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', runTracking);
+    } else {
+        runTracking();
+    }
 })();
 
 const INITIAL_PRODUCTS = [
