@@ -14,7 +14,7 @@
     <main class="checkout-container">
         
         <!-- Progress Stepper Tracker -->
-        <div class="checkout-progress-wrapper">
+        <div class="checkout-progress-wrapper" style="display: none;">
             <div class="progress-bar-container">
                 <div class="progress-step active" id="step-indicator-address">
                     <span class="step-icon">1</span>
@@ -215,7 +215,7 @@
                 </div>
 
                 <!-- Inline Edit Address Option -->
-                <div style="text-align: center; margin-top: 15px;">
+                <div style="text-align: center; margin-top: 15px; display: none;">
                     <button type="button" class="link-edit-btn" onclick="showWizardStep(1)">✏️ Edit Shipping Address</button>
                 </div>
             </div>
@@ -575,7 +575,15 @@
         }
 
         window.addEventListener('load', () => {
-            showWizardStep(1);
+            // Pre-fill dummy values if empty to pass form validation and payment gateway requirements
+            if (!document.getElementById('cust-name').value) document.getElementById('cust-name').value = 'Direct Customer';
+            if (!document.getElementById('cust-phone').value) document.getElementById('cust-phone').value = '9999999999';
+            if (!document.getElementById('cust-address').value) document.getElementById('cust-address').value = 'Online Purchase Address';
+            if (!document.getElementById('cust-city').value) document.getElementById('cust-city').value = 'New Delhi';
+            if (!document.getElementById('cust-state').value) document.getElementById('cust-state').value = 'Delhi';
+            if (!document.getElementById('cust-pin').value) document.getElementById('cust-pin').value = '110001';
+
+            showWizardStep(2);
             
             // Render the checkout summary on load so the "Order Items" block is populated on Step 1
             renderCheckoutSummary();

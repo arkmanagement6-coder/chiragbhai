@@ -1079,6 +1079,7 @@
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/(^-|-$)/g, '');
 
+                let savedProduct = null;
                 if (isEditing) {
                     const idx = products.findIndex(p => String(p.id) === String(id));
                     if (idx !== -1) {
@@ -1098,12 +1099,13 @@
                             specs: specs.length > 0 ? specs : undefined,
                             descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
                         };
+                        savedProduct = products[idx];
                     } else {
                         throw new Error("Product with ID " + id + " was not found in the inventory. Available: " + JSON.stringify(products.map(p => ({ id: p.id, type: typeof p.id }))));
                     }
                 } else {
                     const newId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
-                    products.push({
+                    savedProduct = {
                         id: newId,
                         title,
                         handle,
@@ -1119,10 +1121,11 @@
                         paymentLink: paymentLink,
                         specs: specs.length > 0 ? specs : undefined,
                         descriptionImages: descriptionImages.length > 0 ? descriptionImages : undefined
-                    });
+                    };
+                    products.push(savedProduct);
                 }
 
-                await saveProducts(products);
+                await saveProducts(products, savedProduct);
                 closeProductModal();
                 await renderInventory();
                 alert("Product saved and synced successfully!");

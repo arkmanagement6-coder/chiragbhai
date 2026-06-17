@@ -732,99 +732,136 @@ function cleanUndefinedFields(obj) {
     return obj;
 }
 
-// Product Database Helpers (Firestore Async with local Cache fallback)
-async function getProducts() {
-    dbInit();
-    const db = await initFirebase();
-    
-    if (db) {
-        try {
-            const snapshot = await db.collection('products').get();
-            let productsMap = {};
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const prodId = String(data.id || doc.id);
-                
-                if (productsMap[prodId]) {
-                    const existing = productsMap[prodId];
-                    if (doc.id === prodId) {
-                        console.warn("Deleting duplicate legacy document in Firestore:", existing.docId);
-                        db.collection('products').doc(existing.docId).delete().catch(err => console.error(err));
-                        productsMap[prodId] = { docId: doc.id, data: data };
+let productsSyncPromise = null;
+
+async function syncProductsBackground() {
+    if (productsSyncPromise) return productsSyncPromise;
+
+    productsSyncPromise = (async () => {
+        dbInit();
+        const db = await initFirebase();
+        
+        if (db) {
+            try {
+                const snapshot = await db.collection('products').get();
+                let productsMap = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const prodId = String(data.id || doc.id);
+                    
+                    if (productsMap[prodId]) {
+                        const existing = productsMap[prodId];
+                        if (doc.id === prodId) {
+                            console.warn("Deleting duplicate legacy document in Firestore:", existing.docId);
+                            db.collection('products').doc(existing.docId).delete().catch(err => console.error(err));
+                            productsMap[prodId] = { docId: doc.id, data: data };
+                        } else {
+                            console.warn("Deleting duplicate legacy document in Firestore:", doc.id);
+                            db.collection('products').doc(doc.id).delete().catch(err => console.error(err));
+                        }
                     } else {
-                        console.warn("Deleting duplicate legacy document in Firestore:", doc.id);
-                        db.collection('products').doc(doc.id).delete().catch(err => console.error(err));
+                        productsMap[prodId] = { docId: doc.id, data: data };
                     }
-                } else {
-                    productsMap[prodId] = { docId: doc.id, data: data };
+                });
+                
+                let products = Object.keys(productsMap).map(prodId => {
+                    return { id: prodId, ...productsMap[prodId].data };
+                });
+                
+                // Seed defaults if collection is empty
+                if (products.length === 0) {
+                    console.log("Seeding Firestore with default products...");
+                    for (const p of INITIAL_PRODUCTS) {
+                        await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
+                        products.push(p);
+                    }
                 }
-            });
-            
-            let products = Object.keys(productsMap).map(prodId => {
-                return { id: prodId, ...productsMap[prodId].data };
-            });
-            
-            // Seed defaults if collection is empty
-            if (products.length === 0) {
-                console.log("Seeding Firestore with default products...");
-                for (const p of INITIAL_PRODUCTS) {
-                    await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
-                    products.push(p);
+                
+                const oldProductsStr = localStorage.getItem('ikko_products');
+                const newProductsStr = JSON.stringify(products);
+                if (oldProductsStr !== newProductsStr) {
+                    localStorage.setItem('ikko_products', newProductsStr);
+                    // Dispatch event to notify pages to re-render if they want
+                    window.dispatchEvent(new CustomEvent('products-synced', { detail: products }));
                 }
+                return products;
+            } catch (e) {
+                console.error("Error reading Firestore:", e);
             }
-            
-            // Sync local storage cache
+        }
+        
+        // Fallback to localStorage logic
+        let products = JSON.parse(localStorage.getItem('ikko_products')) || [];
+        let updated = false;
+
+        // Auto-inject Demo Product or update its paymentLink if it matches the default fallback
+        const demoIndex = products.findIndex(p => String(p.id) === '8270415000000_demo');
+        if (demoIndex === -1) {
+            const demoProduct = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000000_demo');
+            if (demoProduct) {
+                products.unshift(demoProduct);
+                updated = true;
+            }
+        } else {
+            // Force update paymentLink of demo product if it's using the old fallback
+            if (products[demoIndex].paymentLink === 'https://razorpay.me/@luckydigitalmedia' || !products[demoIndex].paymentLink) {
+                products[demoIndex].paymentLink = 'https://rzp.io/rzp/tHlmofq';
+                updated = true;
+            }
+        }
+
+        products = products.map(p => {
+            if (!p.paymentLink) {
+                p.paymentLink = 'https://razorpay.me/@luckydigitalmedia';
+                updated = true;
+            }
+            return p;
+        });
+        if (updated) {
             localStorage.setItem('ikko_products', JSON.stringify(products));
-            return products;
-        } catch (e) {
-            console.error("Error reading Firestore, falling back to local storage cache:", e);
         }
-    }
+        return products;
+    })();
 
-    let products = JSON.parse(localStorage.getItem('ikko_products')) || [];
-    let updated = false;
-
-    
-    // Auto-inject Demo Product or update its paymentLink if it matches the default fallback
-    const demoIndex = products.findIndex(p => String(p.id) === '8270415000000_demo');
-    if (demoIndex === -1) {
-        const demoProduct = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000000_demo');
-        if (demoProduct) {
-            products.unshift(demoProduct);
-            updated = true;
-        }
-    } else {
-        // Force update paymentLink of demo product if it's using the old fallback
-        if (products[demoIndex].paymentLink === 'https://razorpay.me/@luckydigitalmedia' || !products[demoIndex].paymentLink) {
-            products[demoIndex].paymentLink = 'https://rzp.io/rzp/tHlmofq';
-            updated = true;
-        }
-    }
-
-    products = products.map(p => {
-        if (!p.paymentLink) {
-            p.paymentLink = 'https://razorpay.me/@luckydigitalmedia';
-            updated = true;
-        }
-        return p;
-    });
-    if (updated) {
-        localStorage.setItem('ikko_products', JSON.stringify(products));
-    }
-    return products;
+    const result = await productsSyncPromise;
+    productsSyncPromise = null;
+    return result;
 }
 
-async function saveProducts(products) {
+// Product Database Helpers (Firestore Async with local Cache fallback)
+async function getProducts() {
+    const cached = localStorage.getItem('ikko_products');
+    if (cached) {
+        try {
+            const products = JSON.parse(cached);
+            if (products && products.length > 0) {
+                // Trigger background sync but don't await it to keep loading instant!
+                syncProductsBackground().catch(err => console.error("Background sync error:", err));
+                return products;
+            }
+        } catch (e) {}
+    }
+    // No cache, await the sync
+    return await syncProductsBackground();
+}
+
+async function saveProducts(products, changedProduct = null) {
     localStorage.setItem('ikko_products', JSON.stringify(products));
 
     const db = await initFirebase();
     if (db) {
         try {
-            // Write each product to Firestore
-            for (const p of products) {
-                await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
+            if (changedProduct) {
+                // Highly optimized: Only save the single modified/added product to Firestore!
+                await db.collection('products').doc(String(changedProduct.id)).set(cleanUndefinedFields(changedProduct));
+                console.log(`Synced single modified product ${changedProduct.id} to Firestore.`);
+            } else {
+                // Fallback (e.g. if we want to sync the entire list)
+                for (const p of products) {
+                    await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
+                }
+                console.log("Synced all products to Firestore.");
             }
-            console.log("Synced products list to Firestore.");
         } catch (e) {
             console.error("Failed to save products to Firestore:", e);
             throw new Error("Firestore Database Write Failed: " + e.message + "\n\nPlease check your Firestore rules (e.g. they must allow unauthenticated writes or admin access).");
