@@ -183,40 +183,48 @@
                 }
             }
 
-            descriptionHtml = `
-                <div class="rich-pdp-description">
-                    <p class="pdp-intro-para">${detailParagraph}</p>
-                    
-                    <div class="pdp-features-grid">
-                        <div class="pdp-feature-card">
-                            <span class="feat-icon">🚚</span>
-                            <span class="feat-text">Free Shipping</span>
-                        </div>
-                        <div class="pdp-feature-card">
-                            <span class="feat-icon">🛡️</span>
-                            <span class="feat-text">Brand Warranty</span>
-                        </div>
-                        <div class="pdp-feature-card">
-                            <span class="feat-icon">🔄</span>
-                            <span class="feat-text">Easy Returns</span>
-                        </div>
+            if (selectedProduct.description) {
+                descriptionHtml = `
+                    <div class="rich-pdp-description">
+                        ${selectedProduct.description}
                     </div>
+                `;
+            } else {
+                descriptionHtml = `
+                    <div class="rich-pdp-description">
+                        <p class="pdp-intro-para">${detailParagraph}</p>
+                        
+                        <div class="pdp-features-grid">
+                            <div class="pdp-feature-card">
+                                <span class="feat-icon">🚚</span>
+                                <span class="feat-text">Free Shipping</span>
+                            </div>
+                            <div class="pdp-feature-card">
+                                <span class="feat-icon">🛡️</span>
+                                <span class="feat-text">Brand Warranty</span>
+                            </div>
+                            <div class="pdp-feature-card">
+                                <span class="feat-icon">🔄</span>
+                                <span class="feat-text">Easy Returns</span>
+                            </div>
+                        </div>
 
-                    <div class="pdp-desc-section">
-                        <h4>🔑 Product Highlights</h4>
-                        <ul class="pdp-highlights-list">
-                            ${highlights.map(h => `<li>${h}</li>`).join('')}
-                        </ul>
-                    </div>
+                        <div class="pdp-desc-section">
+                            <h4>🔑 Product Highlights</h4>
+                            <ul class="pdp-highlights-list">
+                                ${highlights.map(h => `<li>${h}</li>`).join('')}
+                            </ul>
+                        </div>
 
-                    <div class="pdp-desc-section">
-                        <h4>📦 What's in the Box</h4>
-                        <ul class="pdp-box-list">
-                            ${inTheBox.map(item => `<li><span class="check-bullet">✓</span> ${item}</li>`).join('')}
-                        </ul>
+                        <div class="pdp-desc-section">
+                            <h4>📦 What's in the Box</h4>
+                            <ul class="pdp-box-list">
+                                ${inTheBox.map(item => `<li><span class="check-bullet">✓</span> ${item}</li>`).join('')}
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
 
             container.innerHTML = `
                 <!-- Left Image Gallery Column -->
