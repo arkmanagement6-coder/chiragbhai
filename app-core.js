@@ -140,7 +140,7 @@ const INITIAL_PRODUCTS = [
       "value": "2360 x 1640 Pixels"
     }
   ],
-  "paymentLink": "https://razorpay.me/@luckydigitalmedia"
+  "paymentLink": "https://rzp.io/rzp/tHlmofq"
 },
   {
     "id": "8270415000001",
@@ -969,7 +969,7 @@ async function syncProductsBackground(forceSync = false) {
                 // Ensure Demo Product is permanently filtered out
                 products = products.filter(p => String(p.id) !== '8270415000000_demo');
 
-                // Sanitize products to prevent XSS payloads from hiding the DOM
+                // Sanitize products to prevent XSS payloads from hiding the DOM and update old payment links
                 products = products.map(p => {
                     const sanitize = (str) => {
                         if (typeof str !== 'string') return str;
@@ -983,7 +983,8 @@ async function syncProductsBackground(forceSync = false) {
                         title: sanitize(p.title),
                         description: sanitize(p.description),
                         image: sanitize(p.image),
-                        category: sanitize(p.category)
+                        category: sanitize(p.category),
+                        paymentLink: (!p.paymentLink || p.paymentLink === 'https://razorpay.me/@luckydigitalmedia') ? 'https://rzp.io/rzp/tHlmofq' : p.paymentLink
                     };
                 });
 
@@ -1047,8 +1048,8 @@ async function syncProductsBackground(forceSync = false) {
         }
 
         products = products.map(p => {
-            if (!p.paymentLink) {
-                p.paymentLink = 'https://razorpay.me/@luckydigitalmedia';
+            if (!p.paymentLink || p.paymentLink === 'https://razorpay.me/@luckydigitalmedia') {
+                p.paymentLink = 'https://rzp.io/rzp/tHlmofq';
                 updated = true;
             }
             if ((String(p.id) === '8270415000009' || String(p.id) === '8270415000021') && p.title.includes('iPad')) {

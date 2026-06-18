@@ -1007,7 +1007,7 @@
             // Clear inputs
             document.getElementById('product-form').reset();
             document.getElementById('form-product-id').value = '';
-            document.getElementById('form-payment-link').value = 'https://razorpay.me/@luckydigitalmedia';
+            document.getElementById('form-payment-link').value = 'https://rzp.io/rzp/tHlmofq';
             
             // Clear image urls container and add a default row
             const container = document.getElementById('image-urls-container');
@@ -1044,7 +1044,7 @@
             document.getElementById('form-stock').value = product.stockStatus || 'in-stock';
             document.getElementById('form-category').value = product.category || getProductCategory(product);
             document.getElementById('form-desc').value = product.description || '';
-            document.getElementById('form-payment-link').value = product.paymentLink || 'https://razorpay.me/@luckydigitalmedia';
+            document.getElementById('form-payment-link').value = product.paymentLink || 'https://rzp.io/rzp/tHlmofq';
 
             // Handle specs field
             if (product.specs && Array.isArray(product.specs)) {
@@ -1090,7 +1090,7 @@
                 const badge = document.getElementById('form-badge').value.trim();
                 const stockStatus = document.getElementById('form-stock').value;
                 const desc = document.getElementById('form-desc').value.trim();
-                const paymentLink = document.getElementById('form-payment-link').value.trim() || 'https://razorpay.me/@luckydigitalmedia';
+                const paymentLink = document.getElementById('form-payment-link').value.trim() || 'https://rzp.io/rzp/tHlmofq';
 
                 // Parse specifications
                 const specsText = document.getElementById('form-specs').value.trim();
