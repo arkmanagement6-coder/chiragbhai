@@ -947,8 +947,24 @@ async function syncProductsBackground() {
             }
         }
         
-        // Fallback to localStorage logic
-        let products = JSON.parse(localStorage.getItem('ikko_products')) || [];
+        // Fallback: Fetch products.json from server if Firestore fails or is disabled
+        let products = [];
+        try {
+            const res = await fetch('/products.json?v=' + Date.now());
+            if (res.ok) {
+                products = await res.json();
+            } else {
+                throw new Error("HTTP Status " + res.status);
+            }
+        } catch (e) {
+            console.warn("Failed to load products.json from server, falling back to localStorage:", e);
+            products = JSON.parse(localStorage.getItem('ikko_products')) || [];
+        }
+
+        if (!products || products.length === 0) {
+            products = [...INITIAL_PRODUCTS];
+        }
+
         let updated = false;
 
         // Auto-inject Demo Product or update its paymentLink if it matches the default fallback
@@ -990,19 +1006,25 @@ async function syncProductsBackground() {
 }
 
 // Product Database Helpers (Firestore Async with local Cache fallback)
-async function getProducts() {
+async function getProducts(forceSync = false) {
     const cached = localStorage.getItem('ikko_products');
-    if (cached) {
+    const alreadySynced = sessionStorage.getItem('ikko_products_synced');
+
+    if (cached && !forceSync) {
         try {
             const products = JSON.parse(cached);
             if (products && products.length > 0) {
-                // Trigger background sync but don't await it to keep loading instant!
-                syncProductsBackground().catch(err => console.error("Background sync error:", err));
+                // Trigger background sync only once per session to prevent hitting Firestore limits
+                if (!alreadySynced) {
+                    sessionStorage.setItem('ikko_products_synced', 'true');
+                    syncProductsBackground().catch(err => console.error("Background sync error:", err));
+                }
                 return products;
             }
         } catch (e) {}
     }
-    // No cache, await the sync
+    // No cache or forcing sync, await the sync
+    sessionStorage.setItem('ikko_products_synced', 'true');
     return await syncProductsBackground();
 }
 
