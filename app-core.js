@@ -281,11 +281,11 @@ const INITIAL_PRODUCTS = [
     "category": "tablets",
     "paymentLink": "https://rzp.io/rzp/tHlmofq",
     "descriptionImages": [
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/1.webp",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/2.webp",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/3.webp",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/4.webp",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/5.webp"
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/1.webp",
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/2.webp",
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/3.webp",
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/4.webp",
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/5.webp"
     ],
     "comparePrice": "Rs. 49,900.00",
     "handle": "apple-ipad-mini-6th-gen-256-gb-rom-8-3-inch-with-wi-fi-5g",
@@ -295,10 +295,10 @@ const INITIAL_PRODUCTS = [
     "images": [
       "https://look-10287.myshopify.com/cdn/shop/files/3_512x512.jpg?v=1781259492",
       "https://look-10287.myshopify.com/cdn/shop/files/1_512x512.jpg?v=1781259492",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/2_869x869.webp",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/4_869x869.webp",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/5_547cc859-8e23-4c45-8556-c9726f67dc61_869x869.webp",
-      "Image/Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G/6_869x869.webp"
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/2_869x869.webp",
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/4_869x869.webp",
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/5_547cc859-8e23-4c45-8556-c9726f67dc61_869x869.webp",
+      "Image/Apple%20iPad%20mini%20(6th%20Gen)%20256%20GB%20ROM%208.3%20inch%20with%20Wi-Fi%2B5G/6_869x869.webp"
     ],
     "image": "https://look-10287.myshopify.com/cdn/shop/files/3_512x512.jpg?v=1781259492",
     "title": "Apple iPad mini (6th Gen) 256 GB ROM 8.3 inch with Wi-Fi+5G",
