@@ -900,17 +900,26 @@ async function syncProductsBackground(forceSync = false) {
         
         if (db) {
             try {
-                const settings = getSettings();
-                const serverTimestamp = settings.productsLastUpdated;
-                const localTimestamp = localStorage.getItem('ikko_products_last_updated');
+                // Read the actual server timestamp directly from Firestore settings
+                let serverTimestamp = 0;
+                try {
+                    const settingsDoc = await db.collection('settings').doc('global').get();
+                    if (settingsDoc.exists) {
+                        serverTimestamp = settingsDoc.data().productsLastUpdated || 0;
+                    }
+                } catch (err) {
+                    console.warn("Could not read server timestamp from Firestore:", err);
+                }
+
+                const localTimestamp = parseInt(localStorage.getItem('ikko_products_last_updated') || '0');
                 const cachedProducts = localStorage.getItem('ikko_products');
 
-                // If timestamps match and cache exists, skip reading Firestore to conserve read quota
-                if (!forceSync && serverTimestamp && localTimestamp === String(serverTimestamp) && cachedProducts) {
+                // If local cache is up-to-date or newer, skip fetching from Firestore
+                if (!forceSync && serverTimestamp && localTimestamp >= serverTimestamp && cachedProducts) {
                     try {
                         const parsed = JSON.parse(cachedProducts);
                         if (parsed && parsed.length > 0) {
-                            console.log("⚡ Products cache is up-to-date with Firestore (version: " + serverTimestamp + ")");
+                            console.log("⚡ Products cache is up-to-date/newer with Firestore (version: " + serverTimestamp + ")");
                             return parsed;
                         }
                     } catch (e) {}
