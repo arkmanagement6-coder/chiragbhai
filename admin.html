@@ -1245,7 +1245,7 @@
 
         // Restore Server Catalog Helper
         async function restoreServerCatalog() {
-            if (confirm("Are you sure you want to load products.json from the server and overwrite the Firestore database? This will restore yesterday's catalog updates.")) {
+            if (confirm("Are you sure you want to load products.json from the server and overwrite the Firestore database? This will restore the latest catalog updates.")) {
                 try {
                     const res = await fetch('/products.json?v=' + Date.now());
                     if (!res.ok) throw new Error("HTTP error " + res.status);
@@ -1253,7 +1253,7 @@
                     
                     if (products && products.length > 0) {
                         await saveProducts(products);
-                        alert("Successfully restored yesterday's " + products.length + " products to Firestore!");
+                        alert("Successfully restored the latest " + products.length + " products to Firestore!");
                         location.reload();
                     } else {
                         alert("Error: products.json is empty or invalid!");
