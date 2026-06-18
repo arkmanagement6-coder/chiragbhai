@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buy Product | IKKO DIGITAL</title>
-    <link rel="stylesheet" href="style.css?v=2.3">
+    <link rel="stylesheet" href="style.css?v=2.4">
 </head>
 <body>
 
@@ -84,9 +84,76 @@
 
         // Change PDP main preview image
         function changeMainImage(src, element) {
-            document.getElementById('pdp-large-img').src = src;
+            const img = document.getElementById('pdp-large-img');
+            if (img) {
+                img.src = src;
+                img.style.transform = 'scale(1)';
+                img.style.transformOrigin = 'center center';
+            }
             document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
             element.classList.add('active');
+            
+            // Reset zoom state on container
+            const container = document.querySelector('.pdp-main-image');
+            if (container) {
+                container.isZoomed = false;
+                container.style.cursor = 'zoom-in';
+            }
+        }
+
+        // Initialize professional product image zoom
+        function initProductImageZoom() {
+            const container = document.querySelector('.pdp-main-image');
+            const img = document.getElementById('pdp-large-img');
+            if (!container || !img) return;
+
+            container.isZoomed = false;
+
+            const handleMove = (e) => {
+                const rect = container.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                const x = ((clientX - rect.left) / rect.width) * 100;
+                const y = ((clientY - rect.top) / rect.height) * 100;
+                
+                img.style.transformOrigin = `${x}% ${y}%`;
+            };
+
+            // Desktop Hover Events
+            container.addEventListener('mouseenter', () => {
+                if (!container.isZoomed) {
+                    img.style.transform = 'scale(2)';
+                }
+            });
+
+            container.addEventListener('mousemove', handleMove);
+
+            container.addEventListener('mouseleave', () => {
+                if (!container.isZoomed) {
+                    img.style.transform = 'scale(1)';
+                    img.style.transformOrigin = 'center center';
+                }
+            });
+
+            // Click Toggle Event (Mobile tap-to-zoom / Desktop click-to-lock zoom)
+            container.addEventListener('click', (e) => {
+                if (e.target !== container && e.target !== img) return;
+                
+                container.isZoomed = !container.isZoomed;
+                if (container.isZoomed) {
+                    img.style.transform = 'scale(2)';
+                    const rect = container.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    img.style.transformOrigin = `${x}% ${y}%`;
+                    container.style.cursor = 'zoom-out';
+                } else {
+                    img.style.transform = 'scale(1)';
+                    img.style.transformOrigin = 'center center';
+                    container.style.cursor = 'zoom-in';
+                }
+            });
         }
 
         async function handleBuyNow() {
@@ -340,6 +407,7 @@
             `;
 
             await renderRelatedProducts();
+            initProductImageZoom();
         }
 
         async function renderRelatedProducts() {

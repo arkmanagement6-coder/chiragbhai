@@ -876,12 +876,14 @@ button, input, select, textarea {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: zoom-in;
 }
 .pdp-main-image img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
     padding: 20px;
+    transition: transform 0.1s ease-out;
 }
 .pdp-thumbnails {
     display: flex;
