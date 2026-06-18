@@ -971,6 +971,24 @@ async function syncProductsBackground(forceSync = false) {
                     }
                 }
 
+                // Sanitize products to prevent XSS payloads from hiding the DOM
+                products = products.map(p => {
+                    const sanitize = (str) => {
+                        if (typeof str !== 'string') return str;
+                        return str.replace(/<\/?(script|style|iframe|object|embed|meta|link)[^>]*>/gi, '')
+                                  .replace(/on\w+="[^"]*"/gi, '')
+                                  .replace(/on\w+='[^']*'/gi, '')
+                                  .replace(/on\w+=[^\s>]+/gi, '');
+                    };
+                    return {
+                        ...p,
+                        title: sanitize(p.title),
+                        description: sanitize(p.description),
+                        image: sanitize(p.image),
+                        category: sanitize(p.category)
+                    };
+                });
+
                 const oldProductsStr = localStorage.getItem('ikko_products');
                 const newProductsStr = JSON.stringify(products);
                 if (oldProductsStr !== newProductsStr) {
@@ -997,6 +1015,25 @@ async function syncProductsBackground(forceSync = false) {
             console.warn("Failed to load products.json from server, falling back to localStorage:", e);
             products = JSON.parse(localStorage.getItem('ikko_products')) || [];
         }
+
+        // Sanitize products
+        products = products.map(p => {
+            const sanitize = (str) => {
+                if (typeof str !== 'string') return str;
+                return str.replace(/<\/?(script|style|iframe|object|embed|meta|link)[^>]*>/gi, '')
+                          .replace(/on\w+="[^"]*"/gi, '')
+                          .replace(/on\w+='[^']*'/gi, '')
+                          .replace(/on\w+=[^\s>]+/gi, '');
+            };
+            return {
+                ...p,
+                title: sanitize(p.title),
+                description: sanitize(p.description),
+                image: sanitize(p.image),
+                category: sanitize(p.category)
+            };
+        });
+
 
         if (!products || products.length === 0) {
             products = [...INITIAL_PRODUCTS];
