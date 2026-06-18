@@ -102,20 +102,6 @@
 
 const INITIAL_PRODUCTS = [
   {
-    "id": "8270415000000_demo",
-    "title": "Demo Product",
-    "handle": "demo-product",
-    "url": "/products/demo-product",
-    "price": "Rs. 1.00",
-    "comparePrice": "Rs. 1,000.00",
-    "badge": "99%",
-    "image": "demo_cake.png",
-    "images": [
-      "demo_cake.png"
-    ],
-    "paymentLink": "https://rzp.io/rzp/tHlmofq"
-  },
-  {
   "id": "8270415000000",
   "title": "Apple iPad Air 11″ (M2): Liquid Retina Display, 256GB, Landscape 12MP Front Camera / 12MP Back Camera, Wi-Fi 6E, Touch ID, All-Day Battery Life-Gray",
   "handle": "apple-ipad-air-11-m2-liquid-retina-display-256gb-landscape-12mp-front-camera-12mp-back-camera-wi-fi-6e-touch-id-all-day-battery-life-gray",
@@ -980,6 +966,9 @@ async function syncProductsBackground(forceSync = false) {
                     }
                 }
 
+                // Ensure Demo Product is permanently filtered out
+                products = products.filter(p => String(p.id) !== '8270415000000_demo');
+
                 // Sanitize products to prevent XSS payloads from hiding the DOM
                 products = products.map(p => {
                     const sanitize = (str) => {
@@ -1050,20 +1039,11 @@ async function syncProductsBackground(forceSync = false) {
 
         let updated = false;
 
-        // Auto-inject Demo Product or update its paymentLink if it matches the default fallback
-        const demoIndex = products.findIndex(p => String(p.id) === '8270415000000_demo');
-        if (demoIndex === -1) {
-            const demoProduct = INITIAL_PRODUCTS.find(p => String(p.id) === '8270415000000_demo');
-            if (demoProduct) {
-                products.unshift(demoProduct);
-                updated = true;
-            }
-        } else {
-            // Force update paymentLink of demo product if it's using the old fallback
-            if (products[demoIndex].paymentLink === 'https://razorpay.me/@luckydigitalmedia' || !products[demoIndex].paymentLink) {
-                products[demoIndex].paymentLink = 'https://rzp.io/rzp/tHlmofq';
-                updated = true;
-            }
+        // Ensure Demo Product is permanently filtered out
+        const originalLength = products.length;
+        products = products.filter(p => String(p.id) !== '8270415000000_demo');
+        if (products.length !== originalLength) {
+            updated = true;
         }
 
         products = products.map(p => {
