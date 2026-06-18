@@ -891,7 +891,7 @@ function cleanUndefinedFields(obj) {
 
 let productsSyncPromise = null;
 
-async function syncProductsBackground() {
+async function syncProductsBackground(forceSync = false) {
     if (productsSyncPromise) return productsSyncPromise;
 
     productsSyncPromise = (async () => {
@@ -900,50 +900,87 @@ async function syncProductsBackground() {
         
         if (db) {
             try {
-                const snapshot = await db.collection('products').get();
-                let productsMap = {};
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const prodId = String(data.id || doc.id);
-                    
-                    if (productsMap[prodId]) {
-                        const existing = productsMap[prodId];
-                        if (doc.id === prodId) {
-                            console.warn("Deleting duplicate legacy document in Firestore:", existing.docId);
-                            db.collection('products').doc(existing.docId).delete().catch(err => console.error(err));
-                            productsMap[prodId] = { docId: doc.id, data: data };
-                        } else {
-                            console.warn("Deleting duplicate legacy document in Firestore:", doc.id);
-                            db.collection('products').doc(doc.id).delete().catch(err => console.error(err));
+                const settings = getSettings();
+                const serverTimestamp = settings.productsLastUpdated;
+                const localTimestamp = localStorage.getItem('ikko_products_last_updated');
+                const cachedProducts = localStorage.getItem('ikko_products');
+
+                // If timestamps match and cache exists, skip reading Firestore to conserve read quota
+                if (!forceSync && serverTimestamp && localTimestamp === String(serverTimestamp) && cachedProducts) {
+                    try {
+                        const parsed = JSON.parse(cachedProducts);
+                        if (parsed && parsed.length > 0) {
+                            console.log("⚡ Products cache is up-to-date with Firestore (version: " + serverTimestamp + ")");
+                            return parsed;
                         }
-                    } else {
-                        productsMap[prodId] = { docId: doc.id, data: data };
-                    }
-                });
-                
-                let products = Object.keys(productsMap).map(prodId => {
-                    return { id: prodId, ...productsMap[prodId].data };
-                });
-                
-                // Seed defaults if collection is empty
+                    } catch (e) {}
+                }
+
+                console.log("🔄 Fetching product chunks from Firestore...");
+                const snapshot = await db.collection('products_chunks').get();
+                let products = [];
+
+                if (!snapshot.empty) {
+                    let chunks = [];
+                    snapshot.forEach(doc => {
+                        chunks.push({ index: parseInt(doc.id) || 0, products: doc.data().products || [] });
+                    });
+                    // Sort chunks by index to preserve catalogue ordering
+                    chunks.sort((a, b) => a.index - b.index);
+                    chunks.forEach(c => products.push(...c.products));
+                }
+
+                // Seamless backward-compatible legacy migration:
+                // If products_chunks collection is empty, try migrating from individual legacy documents
                 if (products.length === 0) {
-                    console.log("Seeding Firestore with default products...");
-                    for (const p of INITIAL_PRODUCTS) {
-                        await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
-                        products.push(p);
+                    console.log("Products chunks are empty in Firestore. Attempting migration from legacy products collection...");
+                    const legacySnapshot = await db.collection('products').get();
+                    if (!legacySnapshot.empty) {
+                        let legacyMap = {};
+                        legacySnapshot.forEach(doc => {
+                            const data = doc.data();
+                            const prodId = String(data.id || doc.id);
+                            legacyMap[prodId] = data;
+                        });
+                        products = Object.keys(legacyMap).map(prodId => {
+                            return { id: prodId, ...legacyMap[prodId] };
+                        });
+                        console.log(`Migrated ${products.length} products from legacy collection.`);
+                    }
+
+                    if (products.length === 0) {
+                        console.log("No legacy products found. Seeding default catalog...");
+                        products = [...INITIAL_PRODUCTS];
+                    }
+
+                    // Save the migrated or seeded catalog to products_chunks
+                    const CHUNK_SIZE = 5;
+                    for (let i = 0; i < products.length; i += CHUNK_SIZE) {
+                        const chunk = products.slice(i, i + CHUNK_SIZE);
+                        await db.collection('products_chunks').doc(String(Math.floor(i / CHUNK_SIZE))).set({ products: cleanUndefinedFields(chunk) });
+                    }
+                    
+                    // Set timestamp in settings to align versions
+                    const initTimestamp = Date.now();
+                    await db.collection('settings').doc('global').set({ productsLastUpdated: initTimestamp }, { merge: true });
+                    localStorage.setItem('ikko_products_last_updated', String(initTimestamp));
+                } else {
+                    // Cache version timestamp locally if retrieved successfully
+                    if (serverTimestamp) {
+                        localStorage.setItem('ikko_products_last_updated', String(serverTimestamp));
                     }
                 }
-                
+
                 const oldProductsStr = localStorage.getItem('ikko_products');
                 const newProductsStr = JSON.stringify(products);
                 if (oldProductsStr !== newProductsStr) {
                     localStorage.setItem('ikko_products', newProductsStr);
-                    // Dispatch event to notify pages to re-render if they want
+                    // Dispatch event to notify pages to re-render
                     window.dispatchEvent(new CustomEvent('products-synced', { detail: products }));
                 }
                 return products;
             } catch (e) {
-                console.error("Error reading Firestore:", e);
+                console.error("Error reading Firestore chunks:", e);
             }
         }
         
@@ -1017,7 +1054,7 @@ async function getProducts(forceSync = false) {
                 // Trigger background sync only once per session to prevent hitting Firestore limits
                 if (!alreadySynced) {
                     sessionStorage.setItem('ikko_products_synced', 'true');
-                    syncProductsBackground().catch(err => console.error("Background sync error:", err));
+                    syncProductsBackground(false).catch(err => console.error("Background sync error:", err));
                 }
                 return products;
             }
@@ -1025,7 +1062,7 @@ async function getProducts(forceSync = false) {
     }
     // No cache or forcing sync, await the sync
     sessionStorage.setItem('ikko_products_synced', 'true');
-    return await syncProductsBackground();
+    return await syncProductsBackground(forceSync);
 }
 
 async function saveProducts(products, changedProduct = null) {
@@ -1034,20 +1071,47 @@ async function saveProducts(products, changedProduct = null) {
     const db = await initFirebase();
     if (db) {
         try {
-            if (changedProduct) {
-                // Highly optimized: Only save the single modified/added product to Firestore!
-                await db.collection('products').doc(String(changedProduct.id)).set(cleanUndefinedFields(changedProduct));
-                console.log(`Synced single modified product ${changedProduct.id} to Firestore.`);
-            } else {
-                // Fallback (e.g. if we want to sync the entire list)
-                for (const p of products) {
-                    await db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p));
+            // Chunk products and write them to products_chunks collection
+            const CHUNK_SIZE = 5;
+            const newChunkCount = Math.ceil(products.length / CHUNK_SIZE);
+            
+            for (let i = 0; i < products.length; i += CHUNK_SIZE) {
+                const chunk = products.slice(i, i + CHUNK_SIZE);
+                const chunkIdx = Math.floor(i / CHUNK_SIZE);
+                await db.collection('products_chunks').doc(String(chunkIdx)).set({ products: cleanUndefinedFields(chunk) });
+            }
+            
+            // Clean up any stale chunks
+            const snapshot = await db.collection('products_chunks').get();
+            snapshot.forEach(doc => {
+                const idx = parseInt(doc.id);
+                if (idx >= newChunkCount) {
+                    db.collection('products_chunks').doc(doc.id).delete().catch(() => {});
                 }
-                console.log("Synced all products to Firestore.");
+            });
+
+            // Set new productsLastUpdated timestamp in Firestore settings document
+            const updateTimestamp = Date.now();
+            await db.collection('settings').doc('global').set({ productsLastUpdated: updateTimestamp }, { merge: true });
+            
+            // Cache timestamp locally to avoid self-re-syncing immediately
+            localStorage.setItem('ikko_products_last_updated', String(updateTimestamp));
+            
+            console.log("Synced all products in chunks to Firestore successfully. Catalog version: " + updateTimestamp);
+
+            // Backward compatibility: write individual products to the legacy collection in the background
+            if (changedProduct) {
+                db.collection('products').doc(String(changedProduct.id)).set(cleanUndefinedFields(changedProduct)).catch(e => {
+                    console.warn("Legacy single-product write failed (non-blocking):", e);
+                });
+            } else {
+                for (const p of products) {
+                    db.collection('products').doc(String(p.id)).set(cleanUndefinedFields(p)).catch(() => {});
+                }
             }
         } catch (e) {
             console.error("Failed to save products to Firestore:", e);
-            throw new Error("Firestore Database Write Failed: " + e.message + "\n\nPlease check your Firestore rules (e.g. they must allow unauthenticated writes or admin access).");
+            throw new Error("Firestore Database Write Failed: " + e.message);
         }
     }
 }
@@ -1060,8 +1124,38 @@ async function deleteProduct(productId) {
     const db = await initFirebase();
     if (db) {
         try {
-            await db.collection('products').doc(String(productId)).delete();
-            console.log(`Product ${productId} deleted from Firestore.`);
+            // Chunk products and write them to products_chunks collection
+            const CHUNK_SIZE = 5;
+            const newChunkCount = Math.ceil(products.length / CHUNK_SIZE);
+            
+            for (let i = 0; i < products.length; i += CHUNK_SIZE) {
+                const chunk = products.slice(i, i + CHUNK_SIZE);
+                const chunkIdx = Math.floor(i / CHUNK_SIZE);
+                await db.collection('products_chunks').doc(String(chunkIdx)).set({ products: cleanUndefinedFields(chunk) });
+            }
+            
+            // Clean up any stale chunks
+            const snapshot = await db.collection('products_chunks').get();
+            snapshot.forEach(doc => {
+                const idx = parseInt(doc.id);
+                if (idx >= newChunkCount) {
+                    db.collection('products_chunks').doc(doc.id).delete().catch(() => {});
+                }
+            });
+
+            // Set new productsLastUpdated timestamp in Firestore settings document
+            const updateTimestamp = Date.now();
+            await db.collection('settings').doc('global').set({ productsLastUpdated: updateTimestamp }, { merge: true });
+            
+            // Cache timestamp locally
+            localStorage.setItem('ikko_products_last_updated', String(updateTimestamp));
+            
+            console.log(`Product ${productId} deleted from catalog in chunks. Catalog version: ` + updateTimestamp);
+            
+            // Legacy single-product deletion in the background
+            db.collection('products').doc(String(productId)).delete().catch(e => {
+                console.warn("Legacy single-product delete failed (non-blocking):", e);
+            });
         } catch (e) {
             console.error("Failed to delete product from Firestore:", e);
             throw new Error("Firestore Database Delete Failed: " + e.message);
