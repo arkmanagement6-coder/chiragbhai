@@ -297,7 +297,7 @@
                     </div>
 
                     <!-- Share buttons -->
-                    <div class="pdp-share-container" style="margin-top: 25px; margin-bottom: 25px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <div class="pdp-share-container" style="margin-top: 25px; margin-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 20px;">
                         <div style="font-size: 0.95rem; font-weight: 600; color: #1e293b; margin-bottom: 10px;">Share this:</div>
                         <div class="pdp-share-buttons" style="display: flex; gap: 10px;">
                             <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" target="_blank" class="share-btn share-facebook" style="width: 32px; height: 32px; border-radius: 50%; background-color: #3b5998; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
@@ -316,7 +316,7 @@
                     </div>
 
                     ${specs && specs.length > 0 ? `
-                    <div style="margin-top: 25px; margin-bottom: 40px; border-top: 1px solid var(--border-color); padding-top: 25px;">
+                    <div style="margin-top: 10px; margin-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                         <h3 class="pdp-specs-title" style="margin-bottom: 15px;">Technical Specifications</h3>
                         <table class="specs-table">
                             <tbody>
@@ -326,7 +326,7 @@
                     </div>
                     ` : ''}
 
-                    <div class="pdp-description" style="border-top: 1px solid var(--border-color); padding-top: 25px;">
+                    <div class="pdp-description" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
                         ${descriptionHtml}
                         ${selectedProduct.descriptionImages && Array.isArray(selectedProduct.descriptionImages) ? `
                             <div class="pdp-desc-extra-images" style="margin-top: 25px; display: flex; flex-direction: column; gap: 20px;">
