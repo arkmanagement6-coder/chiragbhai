@@ -1,6 +1,7 @@
 // Global State and Core Logic for IKKO Digital E-commerce Store
 
 // Meta Pixel Initialization & Tracking Logic
+/*
 (function() {
     const pixelId = '947390424330740';
     
@@ -90,6 +91,7 @@
         runTracking();
     }
 })();
+*/
 
 const INITIAL_PRODUCTS = [
   {
