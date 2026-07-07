@@ -1,5 +1,28 @@
 [
   {
+    "id": "8270415000000_demo",
+    "paymentLink": "https://rzp.io/rzp/tHlmofq",
+    "category": "tablets",
+    "price": "Rs. 1.00",
+    "badge": "DEMO",
+    "title": "Demo Product for Testing (Rs. 1.00)",
+    "image": "demo_cake.png",
+    "images": [
+      "demo_cake.png"
+    ],
+    "url": "/products/demo-product",
+    "stockStatus": "in-stock",
+    "handle": "demo-product",
+    "comparePrice": "Rs. 99.00",
+    "specs": [
+      {
+        "name": "Brand",
+        "value": "Demo"
+      }
+    ],
+    "description": "<h1>Demo Testing Product</h1><p>This is a 1 Rupee demo product for testing payment integration and Meta Pixel.</p>"
+  },
+  {
     "id": "8270415000000",
     "paymentLink": "https://rzp.io/rzp/tHlmofq",
     "category": "tablets",
