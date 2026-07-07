@@ -93,29 +93,6 @@
 
 const INITIAL_PRODUCTS = [
   {
-    "id": "8270415000000_demo",
-    "paymentLink": "https://rzp.io/rzp/tHlmofq",
-    "category": "tablets",
-    "price": "Rs. 1.00",
-    "badge": "DEMO",
-    "title": "Demo Product for Testing (Rs. 1.00)",
-    "image": "demo_cake.png",
-    "images": [
-      "demo_cake.png"
-    ],
-    "url": "/products/demo-product",
-    "stockStatus": "in-stock",
-    "handle": "demo-product",
-    "comparePrice": "Rs. 99.00",
-    "specs": [
-      {
-        "name": "Brand",
-        "value": "Demo"
-      }
-    ],
-    "description": "<h1>Demo Testing Product</h1><p>This is a 1 Rupee demo product for testing payment integration and Meta Pixel.</p>"
-  },
-  {
     "id": "8270415000000",
     "paymentLink": "https://rzp.io/rzp/tHlmofq",
     "category": "tablets",
@@ -1127,7 +1104,7 @@ async function syncProductsBackground(forceSync = false) {
                 }
 
                 // Ensure Demo Product is permanently filtered out
-                // products = products.filter(p => String(p.id) !== '8270415000000_demo');
+                products = products.filter(p => String(p.id) !== '8270415000000_demo');
 
                 // Sanitize products to prevent XSS payloads from hiding the DOM and update old payment links
                 products = products.map(p => {
@@ -1201,13 +1178,11 @@ async function syncProductsBackground(forceSync = false) {
         let updated = false;
 
         // Ensure Demo Product is permanently filtered out
-        /*
         const originalLength = products.length;
         products = products.filter(p => String(p.id) !== '8270415000000_demo');
         if (products.length !== originalLength) {
             updated = true;
         }
-        */
 
         products = products.map(p => {
             if (!p.paymentLink || p.paymentLink === 'https://razorpay.me/@luckydigitalmedia') {
