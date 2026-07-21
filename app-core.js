@@ -17,13 +17,50 @@
     fbq('init', pixelId);
     fbq('track', 'PageView');
     
+    window.trackViewContent = function(prod) {
+        if (!prod || typeof fbq !== 'function') return;
+        if (window._viewContentTracked === String(prod.id)) return;
+        window._viewContentTracked = String(prod.id);
+        let priceVal = 999;
+        if (prod.price) {
+            const cleaned = String(prod.price).replace(/[^\d.]/g, '');
+            const parsed = parseFloat(cleaned);
+            if (!isNaN(parsed)) priceVal = parsed;
+        }
+        fbq('track', 'ViewContent', {
+            content_ids: [String(prod.id)],
+            content_name: prod.title || 'Product',
+            content_type: 'product',
+            value: priceVal,
+            currency: 'INR'
+        });
+    };
+
     const runTracking = () => {
-        // Track page-specific actions dynamically
         const path = window.location.pathname.toLowerCase();
         
         // Track Checkout Page (InitiateCheckout)
         if (path.includes('checkout.html') || path.endsWith('/checkout') || path.includes('/checkout?')) {
-            fbq('track', 'InitiateCheckout');
+            const cart = JSON.parse(localStorage.getItem('ikko_cart')) || [];
+            let totalVal = 0;
+            const contentIds = [];
+            let numItems = 0;
+            cart.forEach(item => {
+                const cleaned = String(item.price || '').replace(/[^\d.]/g, '');
+                const price = parseFloat(cleaned) || 999;
+                const qty = parseInt(item.qty) || 1;
+                totalVal += price * qty;
+                numItems += qty;
+                if (item.id) contentIds.push(String(item.id));
+            });
+            if (totalVal === 0) totalVal = 999;
+            fbq('track', 'InitiateCheckout', {
+                value: totalVal,
+                currency: 'INR',
+                content_type: 'product',
+                content_ids: contentIds,
+                num_items: numItems
+            });
         }
         
         // Track Purchase Page (Purchase)
@@ -45,41 +82,34 @@
                                (order && order.status !== 'cancelled' && order.utr !== 'Payment Failed');
             
             if (order && isSuccess) {
-                let totalVal = 999;
-                if (order.total) {
-                    const cleaned = String(order.total).replace(/[^\d.]/g, '');
-                    const parsed = parseFloat(cleaned);
-                    if (!isNaN(parsed)) totalVal = parsed;
+                const sessionKey = 'purchase_tracked_' + order.id;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    sessionStorage.setItem(sessionKey, 'true');
+                    let totalVal = 999;
+                    if (order.total) {
+                        const cleaned = String(order.total).replace(/[^\d.]/g, '');
+                        const parsed = parseFloat(cleaned);
+                        if (!isNaN(parsed)) totalVal = parsed;
+                    }
+                    const items = order.items || [];
+                    fbq('track', 'Purchase', {
+                        value: totalVal,
+                        currency: 'INR',
+                        content_type: 'product',
+                        content_ids: items.map(item => String(item.id))
+                    });
                 }
-                fbq('track', 'Purchase', {
-                    value: totalVal,
-                    currency: 'INR',
-                    content_type: 'product',
-                    content_ids: order.items.map(item => String(item.id))
-                });
             }
         }
         
-        // Track Product Page (ViewContent)
+        // Track Product Page (ViewContent) fallback
         if (path.includes('product.html') || path.endsWith('/product') || path.includes('/product?')) {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
             const products = JSON.parse(localStorage.getItem('ikko_products')) || [];
-            const prod = products.find(p => String(p.id) === String(productId));
-            if (prod) {
-                let priceVal = 999;
-                if (prod.price) {
-                    const cleaned = String(prod.price).replace(/[^\d.]/g, '');
-                    const parsed = parseFloat(cleaned);
-                    if (!isNaN(parsed)) priceVal = parsed;
-                }
-                fbq('track', 'ViewContent', {
-                    content_ids: [String(prod.id)],
-                    content_name: prod.title,
-                    content_type: 'product',
-                    value: priceVal,
-                    currency: 'INR'
-                });
+            if (products.length > 0) {
+                const prod = products.find(p => String(p.id) === String(productId)) || products[0];
+                if (prod) window.trackViewContent(prod);
             }
         }
     };
