@@ -2,7 +2,8 @@
 
 // Meta Pixel Initialization & Tracking Logic
 (function() {
-    const pixelId = '947390424330740';
+    const pixelId1 = '947390424330740';
+    const pixelId2 = '958825056704621';
     
     // Initialize standard Meta Pixel tracking snippet
     !function(f,b,e,v,n,t,s)
@@ -14,7 +15,8 @@
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
     
-    fbq('init', pixelId);
+    fbq('init', pixelId1);
+    fbq('init', pixelId2);
     fbq('track', 'PageView');
     
     window.trackViewContent = function(prod) {
